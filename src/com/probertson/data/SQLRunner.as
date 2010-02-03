@@ -1,0 +1,152 @@
+﻿/*
+For the latest version of this code, visit:
+http://probertson.com/projects/air-sqlite/
+
+Copyright (c) 2009 H. Paul Robertson
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+package com.probertson.data
+{
+	import com.probertson.data.sqlRunnerClasses.ConnectionPool;
+	import com.probertson.data.sqlRunnerClasses.PendingBatch;
+	import com.probertson.data.sqlRunnerClasses.PendingStatement;
+	import com.probertson.data.sqlRunnerClasses.StatementCache;
+	import flash.data.SQLStatement;
+	import flash.filesystem.File;
+	
+	public class SQLRunner 
+	{
+		
+		public function SQLRunner(databaseFile:File, maxPoolSize:int=5) 
+		{
+			_connection = new ConnectionPool(databaseFile, maxPoolSize);
+			// create this cache object ahead of time to avoid the overhead
+			// of checking if its null each time execute() is called.
+			// Other cache objects won't be needed nearly as much, so 
+			// their instantiation can be deferred.
+			_stmtCache = new Object();
+		}
+		
+		
+		// ------- Member vars -------
+		
+		private var _connection:ConnectionPool;
+		private var _stmtCache:Object;
+		private var _batchStmtCache:Object;
+		
+		
+		// ------- Public methods -------
+		
+		/**
+		 * Executes a SQL <code>SELECT</code> query asynchronously. If a SQLConnection is 
+		 * available, the query begins executing immediately. Otherwise, it is added to 
+		 * a queue of pending queries that are executed in request order.
+		 * 
+		 * @param	sql	The text of the SQL statement to execute.
+		 * @param	parameters	An object whose properties contain the values of the parameters
+		 * 						that are used in executing the SQL statement.
+		 * @param	handler		The callback function that's called when the statement execution
+		 * 						finishes. This function should define one parameter, a SQLResult 
+		 * 						object. When the statement is executed, the SQLResult object containing 
+		 * 						the results of the statement execution is passed to this function.
+		 * @param	itemClass	A class that has properties corresponding to the columns in the 
+		 * 						<code>SELECT</code> statement. In the resulting data set, each
+		 * 						result row is represented as an instance of this class.
+		 */
+		public function execute(sql:String, parameters:Object, handler:Function, itemClass:Class=null):void
+		{
+			var stmt:StatementCache = _stmtCache[sql];
+			if (stmt == null)
+			{
+				stmt = new StatementCache(sql);
+				_stmtCache[sql] = stmt;
+			}
+			var pending:PendingStatement = new PendingStatement(stmt, parameters, handler, itemClass);
+			_connection.addPendingStatement(pending);
+		}
+		
+		
+		/**
+		 * Executes the set of SQL statements defined in the batch Vector. The statements
+		 * are executed within a transaction.
+		 * @param	batch	The set of SQL statements to execute, defined as QueuedStatement
+		 * 					objects.
+		 * @param	resultHandler	The function that's called when the batch processing finishes.
+		 * 							This function is called with no arguments.
+		 * @param	errorHandler	The function that's called when an error occurs in the batch.
+		 * 							The function is called with one argument, a SQLError object.
+		 * @param	progressHandler	A function that's called each time progress is made in executing
+		 * 							the batch (including after opening the transaction and after
+		 * 							each statement execution). This function is called with two 
+		 * 							uint arguments: The number of steps completed, 
+		 * 							and the total number of execution steps. (Each "step" is either
+		 * 							a statement to be executed, or the opening or closing of the 
+		 * 							transaction.)
+		 */
+		public function executeModify(statementBatch:Vector.<QueuedStatement>, resultHandler:Function, errorHandler:Function, progressHandler:Function=null):void
+		{
+			var len:int = statementBatch.length;
+			var statements:Vector.<SQLStatement> = new Vector.<SQLStatement>(len);
+			if (_batchStmtCache == null)
+			{
+				_batchStmtCache = new Object();
+			}
+			for (var i:int = 0; i < len; i++)
+			{
+				var sql:String = statementBatch[i].statementText;
+				var stmt:SQLStatement = _batchStmtCache[sql];
+				if (stmt == null)
+				{
+					stmt = new SQLStatement();
+					stmt.text = sql;
+					_batchStmtCache[sql] = stmt;
+				}
+				
+				stmt.clearParameters();
+				var params:Object = statementBatch[i].parameters;
+				if (params != null)
+				{
+					for (var prop:String in params)
+					{
+						stmt.parameters[":" + prop] = params[prop];
+					}
+				}
+				
+				statements[i] = stmt;
+			}
+			
+			var pendingBatch:PendingBatch = new PendingBatch(statements, resultHandler, errorHandler, progressHandler);
+			_connection.addBlockingBatch(pendingBatch);
+		}
+		
+		
+		/**
+		 * Waits until all pending statements execute, then closes all open connections to 
+		 * the database.
+		 * 
+		 * @param	resultHandler	A function that's called when connections are closed.
+		 * 							No argument values are passed to the function.
+		 */
+		public function close(resultHandler:Function):void
+		{
+			_connection.close(resultHandler);
+		}
+	}
+}
