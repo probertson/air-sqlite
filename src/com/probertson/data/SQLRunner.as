@@ -89,7 +89,8 @@ package com.probertson.data
 		 * @param	batch	The set of SQL statements to execute, defined as QueuedStatement
 		 * 					objects.
 		 * @param	resultHandler	The function that's called when the batch processing finishes.
-		 * 							This function is called with no arguments.
+		 * 							This function is called with one argument, a Vector of 
+		 * 							SQLResult objects returned by the batch operations.
 		 * @param	errorHandler	The function that's called when an error occurs in the batch.
 		 * 							The function is called with one argument, a SQLError object.
 		 * @param	progressHandler	A function that's called each time progress is made in executing

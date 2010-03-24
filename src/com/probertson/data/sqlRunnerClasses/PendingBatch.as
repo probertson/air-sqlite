@@ -25,6 +25,7 @@ THE SOFTWARE.
 package com.probertson.data.sqlRunnerClasses
 {
 	import flash.data.SQLConnection;
+	import flash.data.SQLResult;
 	import flash.data.SQLStatement;
 	import flash.data.SQLTransactionLockType;
 	import flash.errors.SQLError;
@@ -46,6 +47,7 @@ package com.probertson.data.sqlRunnerClasses
 		// ------- Member vars -------
 		
 		private var _batch:Vector.<SQLStatement>;
+		private var _results:Vector.<SQLResult>;
 		private var _resultHandler:Function;
 		private var _errorHandler:Function;
 		private var _progressHandler:Function;
@@ -100,6 +102,7 @@ package com.probertson.data.sqlRunnerClasses
 		{
 			callProgressHandler();
 			
+			
 			while (_batch.length > 0)
 			{
 				var stmt:SQLStatement = _batch.shift();
@@ -111,6 +114,8 @@ package com.probertson.data.sqlRunnerClasses
 				stmt.addEventListener(SQLErrorEvent.ERROR, conn_error);
 				stmt.execute();
 			}
+			
+			_results = new Vector.<SQLResult>();
 		}
 		
 		
@@ -119,6 +124,8 @@ package com.probertson.data.sqlRunnerClasses
 			var stmt:SQLStatement = event.target as SQLStatement;
 			stmt.removeEventListener(SQLEvent.RESULT, stmt_result);
 			stmt.removeEventListener(SQLErrorEvent.ERROR, conn_error);
+			
+			_results[_results.length] = stmt.getResult();
 			
 			_statementsCompleted++;
 			callProgressHandler();
@@ -156,7 +163,7 @@ package com.probertson.data.sqlRunnerClasses
 		{
 			if (_resultHandler != null)
 			{
-				_resultHandler();
+				_resultHandler(_results);
 			}
 			
 			cleanUp();	
@@ -238,6 +245,7 @@ package com.probertson.data.sqlRunnerClasses
 			_conn = null;
 			_pool = null;
 			_batch = null;
+			_results = null;
 			_progressHandler = null;
 			_resultHandler = null;
 			_errorHandler = null;
