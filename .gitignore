@@ -1,4 +1,4 @@
-
+*.DS_Store
 /air-sqlite.as3proj
 /.settings
 /bin
