@@ -105,10 +105,13 @@ package com.probertson.data
 		{
 			var len:int = statementBatch.length;
 			var statements:Vector.<SQLStatement> = new Vector.<SQLStatement>(len);
+			var parameters:Vector.<Object> = new Vector.<Object>(len);
+			
 			if (_batchStmtCache == null)
 			{
 				_batchStmtCache = new Object();
 			}
+			
 			for (var i:int = 0; i < len; i++)
 			{
 				var sql:String = statementBatch[i].statementText;
@@ -120,20 +123,11 @@ package com.probertson.data
 					_batchStmtCache[sql] = stmt;
 				}
 				
-				stmt.clearParameters();
-				var params:Object = statementBatch[i].parameters;
-				if (params != null)
-				{
-					for (var prop:String in params)
-					{
-						stmt.parameters[":" + prop] = params[prop];
-					}
-				}
-				
 				statements[i] = stmt;
+				parameters[i] = statementBatch[i].parameters;
 			}
 			
-			var pendingBatch:PendingBatch = new PendingBatch(statements, resultHandler, errorHandler, progressHandler);
+			var pendingBatch:PendingBatch = new PendingBatch(statements, parameters, resultHandler, errorHandler, progressHandler);
 			_connection.addBlockingBatch(pendingBatch);
 		}
 		

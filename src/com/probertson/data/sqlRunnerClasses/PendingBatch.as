@@ -35,9 +35,10 @@ package com.probertson.data.sqlRunnerClasses
 	public class PendingBatch
 	{
 		
-		public function PendingBatch(batch:Vector.<SQLStatement>, resultHandler:Function, errorHandler:Function, progressHandler:Function=null)
+		public function PendingBatch(batch:Vector.<SQLStatement>, parameters:Vector.<Object>, resultHandler:Function, errorHandler:Function, progressHandler:Function=null)
 		{
 			_batch = batch;
+			_parameters = parameters;
 			_resultHandler = resultHandler;
 			_errorHandler = errorHandler;
 			_progressHandler = progressHandler;
@@ -47,6 +48,7 @@ package com.probertson.data.sqlRunnerClasses
 		// ------- Member vars -------
 		
 		private var _batch:Vector.<SQLStatement>;
+		private var _parameters:Vector.<Object>;
 		private var _results:Vector.<SQLResult>;
 		private var _resultHandler:Function;
 		private var _errorHandler:Function;
@@ -94,28 +96,44 @@ package com.probertson.data.sqlRunnerClasses
 		private function conn_begin(event:SQLEvent):void 
 		{
 			_conn.removeEventListener(SQLEvent.BEGIN, conn_begin);
+			
 			executeStatements();
 		}
 		
 		
 		private function executeStatements():void
 		{
+			_results = new Vector.<SQLResult>();
+			executeNextStatement();
+		}
+		
+		
+		private function executeNextStatement():void
+		{
 			callProgressHandler();
 			
-			
-			while (_batch.length > 0)
+			if (_batch.length > 0)
 			{
 				var stmt:SQLStatement = _batch.shift();
 				if (stmt.sqlConnection == null)
 				{
 					stmt.sqlConnection = _conn;
 				}
+				
+				stmt.clearParameters();
+				var params:Object = _parameters.shift();
+				if (params != null)
+				{
+					for (var prop:String in params)
+					{
+						stmt.parameters[":" + prop] = params[prop];
+					}
+				}
+				
 				stmt.addEventListener(SQLEvent.RESULT, stmt_result);
 				stmt.addEventListener(SQLErrorEvent.ERROR, conn_error);
 				stmt.execute();
 			}
-			
-			_results = new Vector.<SQLResult>();
 		}
 		
 		
@@ -128,7 +146,7 @@ package com.probertson.data.sqlRunnerClasses
 			_results[_results.length] = stmt.getResult();
 			
 			_statementsCompleted++;
-			callProgressHandler();
+			executeNextStatement();
 			
 			if (_statementsCompleted == _numStatements)
 			{
@@ -245,6 +263,7 @@ package com.probertson.data.sqlRunnerClasses
 			_conn = null;
 			_pool = null;
 			_batch = null;
+			_parameters = null;
 			_results = null;
 			_progressHandler = null;
 			_resultHandler = null;
