@@ -18,12 +18,7 @@ package tests.com.probertson.data
 	public class SQLRunnerExecuteModifyTest extends EventDispatcher
 	{
 		// Reference declaration for class to test
-		private var _sqlRunner:com.probertson.data.SQLRunner;
-		
-		
-		public function SQLRunnerExecuteModifyTest()
-		{
-		}
+		private var _sqlRunner:SQLRunner;
 		
 		
 		// ------- Instance vars -------
@@ -34,7 +29,7 @@ package tests.com.probertson.data
 		// ------- Setup/cleanup -------
 		
 		[Before]
-		public function setup():void
+		public function setUp():void
 		{
 			_dbFile = File.createTempDirectory().resolvePath("test.db");
 			var createDB:CreateDatabase = new CreateDatabase(_dbFile);
@@ -43,7 +38,7 @@ package tests.com.probertson.data
 		
 		
 		[After(async, timeout="250")]
-		public function teardown():void
+		public function tearDown():void
 		{
 			_sqlRunner.close(sqlRunner_close);
 		}
