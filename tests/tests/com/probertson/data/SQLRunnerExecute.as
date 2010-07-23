@@ -52,6 +52,60 @@ package tests.com.probertson.data
 		
 		// ------- Tests -------
 		
+		// ----- Multiple simultaneous SQL statements -----
+		
+		[Test(async, timeout="500")]
+		public function testConnectionCreation():void
+		{
+			addEventListener(ExecuteResultEvent.RESULT, Async.asyncHandler(this, testConnectionCreation_result2, 500));
+			
+			_sqlRunner = new SQLRunner(_dbFile, 5);
+			_sqlRunner.execute(LOAD_ROWS_LIMIT_SQL, null, testConnectionCreation_result);
+			_sqlRunner.execute(LOAD_ROWS_LIMIT_SQL, null, testConnectionCreation_result);
+			_sqlRunner.execute(LOAD_ROWS_LIMIT_SQL, null, testConnectionCreation_result);
+			_pendingCount = 3;
+		}
+		
+		// --- handlers ---
+		
+		private var _pendingCount:int = 0;
+		
+		private function testConnectionCreation_result(result:SQLResult):void
+		{
+			dispatchEvent(new ExecuteResultEvent(ExecuteResultEvent.RESULT, result));
+		}
+		
+		private function testConnectionCreation_result2(event:ExecuteResultEvent, passThroughData:Object):void
+		{
+			Assert.assertTrue(_sqlRunner.numConnections == _pendingCount);
+		}
+		
+		
+		
+		[Test(async, timeout="500")]
+		public function testConnectionCreationLimit():void
+		{
+			addEventListener(ExecuteResultEvent.RESULT, Async.asyncHandler(this, testConnectionCreationLimit_result2, 500));
+			
+			_sqlRunner = new SQLRunner(_dbFile, 2);
+			_sqlRunner.execute(LOAD_ROWS_LIMIT_SQL, null, testConnectionCreationLimit_result);
+			_sqlRunner.execute(LOAD_ROWS_LIMIT_SQL, null, testConnectionCreationLimit_result);
+			_sqlRunner.execute(LOAD_ROWS_LIMIT_SQL, null, testConnectionCreationLimit_result);
+		}
+		
+		// --- handlers ---
+		
+		private function testConnectionCreationLimit_result(result:SQLResult):void
+		{
+			dispatchEvent(new ExecuteResultEvent(ExecuteResultEvent.RESULT, result));
+		}
+		
+		private function testConnectionCreationLimit_result2(event:ExecuteResultEvent, passThroughData:Object):void
+		{
+			Assert.assertTrue(_sqlRunner.numConnections == 2);
+		}
+		
+		
 		// ----- LIMIT statement -----
 		
 		[Test(async, timeout="500")]

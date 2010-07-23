@@ -57,7 +57,8 @@ package com.probertson.data.sqlRunnerClasses
 		private var _maxSize:int = 5;
 		private var _available:Vector.<SQLConnection>;
 		private var _inUse:Dictionary;
-		private var _total:uint = 0;
+		private var _totalConnections:int = 0;
+		private var _numConnectionsBeingOpened:int = 0;
 		private var _pending:Vector.<PendingStatement>;
 		// Batch/blocking (write/modify) connection
 		private var _blocked:Boolean = false;
@@ -68,6 +69,14 @@ package com.probertson.data.sqlRunnerClasses
 		private var _pendingClose:Boolean = false;
 		private var _pendingCloseHandler:Function;
 		private var _pendingCloseCount:int = 0;
+		
+		
+		// ------- Public properties -------
+		
+		public function get numConnections():int
+		{
+			return _totalConnections;
+		}
 		
 		
 		// ------- Public methods -------
@@ -200,13 +209,14 @@ package com.probertson.data.sqlRunnerClasses
 					_inUse[conn] = true;
 					stmt.executeWithConnection(this, conn);
 				}
-				else if (_total < _maxSize)
+				else if (_totalConnections < _maxSize && _pending.length > _numConnectionsBeingOpened)
 				{
 					// increment the total here, so that while the connection
 					// is being opened further requests don't cause additional
 					// connections to be created
-					_total++;
-					trace("Opening additional SQLConnection. Total:", _total.toString());//x
+					_numConnectionsBeingOpened++;
+					_totalConnections++;
+					trace("Opening additional SQLConnection. Total:", _totalConnections.toString());//x
 					conn = new SQLConnection();
 					conn.addEventListener(SQLEvent.OPEN, conn_open);
 					conn.openAsync(_dbFile, SQLMode.READ);
@@ -248,6 +258,7 @@ package com.probertson.data.sqlRunnerClasses
 			conn.removeEventListener(SQLEvent.OPEN, conn_open);
 			if (conn != _blockingConnection)
 			{
+				_numConnectionsBeingOpened--;
 				returnConnection(conn);
 			}
 			else
