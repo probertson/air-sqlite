@@ -206,7 +206,6 @@ package com.probertson.data.sqlRunnerClasses
 					// is being opened further requests don't cause additional
 					// connections to be created
 					_total++;
-					trace("Opening additional SQLConnection. Total:", _total.toString());//x
 					conn = new SQLConnection();
 					conn.addEventListener(SQLEvent.OPEN, conn_open);
 					conn.openAsync(_dbFile, SQLMode.READ);
