@@ -28,6 +28,7 @@ package com.probertson.data
 	import com.probertson.data.sqlRunnerClasses.PendingBatch;
 	import com.probertson.data.sqlRunnerClasses.PendingStatement;
 	import com.probertson.data.sqlRunnerClasses.StatementCache;
+	
 	import flash.data.SQLStatement;
 	import flash.filesystem.File;
 	
@@ -36,7 +37,7 @@ package com.probertson.data
 		
 		public function SQLRunner(databaseFile:File, maxPoolSize:int=5) 
 		{
-			_connection = new ConnectionPool(databaseFile, maxPoolSize);
+			_connectionPool = new ConnectionPool(databaseFile, maxPoolSize);
 			// create this cache object ahead of time to avoid the overhead
 			// of checking if its null each time execute() is called.
 			// Other cache objects won't be needed nearly as much, so 
@@ -47,9 +48,21 @@ package com.probertson.data
 		
 		// ------- Member vars -------
 		
-		private var _connection:ConnectionPool;
+		private var _connectionPool:ConnectionPool;
 		private var _stmtCache:Object;
 		private var _batchStmtCache:Object;
+		
+		
+		// ------- Public properties -------
+		
+		/**
+		 * The total number of database connections either in the pool
+		 * or in use.
+		 */
+		public function get numConnections():int
+		{
+			return _connectionPool.numConnections;
+		}
 		
 		
 		// ------- Public methods -------
@@ -79,7 +92,7 @@ package com.probertson.data
 				_stmtCache[sql] = stmt;
 			}
 			var pending:PendingStatement = new PendingStatement(stmt, parameters, handler, itemClass);
-			_connection.addPendingStatement(pending);
+			_connectionPool.addPendingStatement(pending);
 		}
 		
 		
@@ -128,7 +141,7 @@ package com.probertson.data
 			}
 			
 			var pendingBatch:PendingBatch = new PendingBatch(statements, parameters, resultHandler, errorHandler, progressHandler);
-			_connection.addBlockingBatch(pendingBatch);
+			_connectionPool.addBlockingBatch(pendingBatch);
 		}
 		
 		
@@ -141,7 +154,7 @@ package com.probertson.data
 		 */
 		public function close(resultHandler:Function):void
 		{
-			_connection.close(resultHandler);
+			_connectionPool.close(resultHandler);
 		}
 	}
 }
