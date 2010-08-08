@@ -82,9 +82,9 @@ package com.probertson.data.sqlRunnerClasses
 		// ------- Public methods -------
 		
 		/**
-		 * Requests a SQLConnection from the pool. If a connection is available
-		 * it is returned immediately. Otherwise connections are returned in the 
-		 * order they're requested, as they become available.
+		 * Adds a pending statement to the execution queue. If a connection is available
+		 * it is executed immediately. Otherwise statements are executed in the 
+		 * order they're requested, as database connections become available.
 		 */
 		public function addPendingStatement(pendingStatement:PendingStatement):void
 		{
@@ -172,6 +172,7 @@ package com.probertson.data.sqlRunnerClasses
 		
 		
 		// ------- Pending statements -------
+		
 		private function checkPending():void
 		{
 			// standard (read-only) statements
@@ -239,10 +240,11 @@ package com.probertson.data.sqlRunnerClasses
 				return;
 			}
 			
-			// if there aren't any pending requests and there is a pending close
-			// request, close the connections
+			// if there aren't any pending requests or currently executing statements 
+			// and there is a pending close request, close the connections
 			if (_pendingClose &&
 				_pending.length == 0 &&
+				(_available.length == _totalConnections) && 
 				!_blocked &&
 				(_blockingPending == null || _blockingPending.length == 0))
 			{
@@ -271,7 +273,7 @@ package com.probertson.data.sqlRunnerClasses
 		{
 			_pendingCloseCount = 0;
 			
-			for each (var conn:SQLConnection in _pending)
+			for each (var conn:SQLConnection in _available)
 			{
 				conn.addEventListener(SQLEvent.CLOSE, conn_close);
 				conn.close();
@@ -283,6 +285,11 @@ package com.probertson.data.sqlRunnerClasses
 				_blockingConnection.addEventListener(SQLEvent.CLOSE, conn_close);
 				_blockingConnection.close();
 				_pendingCloseCount++;
+			}
+			
+			if (_pendingCloseCount == 0)
+			{
+				_finishClosing();
 			}
 		}
 		
@@ -296,14 +303,20 @@ package com.probertson.data.sqlRunnerClasses
 			
 			if (_pendingCloseCount == 0)
 			{
-				while (_pending.length > 0)
-				{
-					_pending.shift();
-				}
-				_blockingConnection = null;
-				
-				_pendingCloseHandler();
+				_finishClosing();
 			}
+		}
+		
+		
+		private function _finishClosing():void
+		{
+			while (_pending.length > 0)
+			{
+				_pending.shift();
+			}
+			_blockingConnection = null;
+			
+			_pendingCloseHandler();
 		}
 	}
 }
