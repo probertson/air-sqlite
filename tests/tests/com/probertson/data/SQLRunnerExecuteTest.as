@@ -15,7 +15,7 @@ package tests.com.probertson.data
 	
 	import utils.CreateDatabase;
 	
-	public class SQLRunnerExecute extends EventDispatcher
+	public class SQLRunnerExecuteTest extends EventDispatcher
 	{		
 		// Reference declaration for class to test
 		private var _sqlRunner:SQLRunner;
