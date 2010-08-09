@@ -73,14 +73,14 @@ package com.probertson.data.sqlRunnerClasses
 			_conn = connection;
 			_numStatements = _batch.length;
 			
-//			if (_numStatements > 1)
-//			{
+			if (_numStatements > 1)
+			{
 				beginTransaction();
-//			}
-//			else
-//			{
-//				executeStatements();
-//			}
+			}
+			else
+			{
+				executeStatements();
+			}
 		}
 		
 		
@@ -150,14 +150,14 @@ package com.probertson.data.sqlRunnerClasses
 			
 			if (_statementsCompleted == _numStatements)
 			{
-//				if (_numStatements > 1)
-//				{
+				if (_numStatements > 1)
+				{
 					commitTransaction();
-//				}
-//				else
-//				{
-//					finish();
-//				}
+				}
+				else
+				{
+					finish();
+				}
 			}
 		}
 		
