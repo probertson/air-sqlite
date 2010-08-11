@@ -204,8 +204,11 @@ package com.probertson.data.sqlRunnerClasses
 		
 		private function cancelExecution():void
 		{
-			_conn.addEventListener(SQLEvent.CANCEL, conn_cancel);
-			_conn.cancel();
+			if (_conn.connected)
+			{
+				_conn.addEventListener(SQLEvent.CANCEL, conn_cancel);
+				_conn.cancel();
+			}
 		}
 		
 		
