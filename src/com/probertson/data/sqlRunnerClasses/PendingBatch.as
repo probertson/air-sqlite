@@ -112,28 +112,25 @@ package com.probertson.data.sqlRunnerClasses
 		{
 			callProgressHandler();
 			
-			if (_batch.length > 0)
+			var stmt:SQLStatement = _batch.shift();
+			if (stmt.sqlConnection == null)
 			{
-				var stmt:SQLStatement = _batch.shift();
-				if (stmt.sqlConnection == null)
-				{
-					stmt.sqlConnection = _conn;
-				}
-				
-				stmt.clearParameters();
-				var params:Object = _parameters.shift();
-				if (params != null)
-				{
-					for (var prop:String in params)
-					{
-						stmt.parameters[":" + prop] = params[prop];
-					}
-				}
-				
-				stmt.addEventListener(SQLEvent.RESULT, stmt_result);
-				stmt.addEventListener(SQLErrorEvent.ERROR, conn_error);
-				stmt.execute();
+				stmt.sqlConnection = _conn;
 			}
+			
+			stmt.clearParameters();
+			var params:Object = _parameters.shift();
+			if (params != null)
+			{
+				for (var prop:String in params)
+				{
+					stmt.parameters[":" + prop] = params[prop];
+				}
+			}
+			
+			stmt.addEventListener(SQLEvent.RESULT, stmt_result);
+			stmt.addEventListener(SQLErrorEvent.ERROR, conn_error);
+			stmt.execute();
 		}
 		
 		
@@ -146,10 +143,15 @@ package com.probertson.data.sqlRunnerClasses
 			_results[_results.length] = stmt.getResult();
 			
 			_statementsCompleted++;
-			executeNextStatement();
 			
-			if (_statementsCompleted == _numStatements)
+			if (_statementsCompleted < _numStatements)
 			{
+				executeNextStatement();
+			}
+			else
+			{
+				callProgressHandler();
+				
 				if (_numStatements > 1)
 				{
 					commitTransaction();
