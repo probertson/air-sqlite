@@ -149,6 +149,10 @@ package com.probertson.data
 		 * Waits until all pending statements execute, then closes all open connections to 
 		 * the database.
 		 * 
+		 * <p>Once you've called <code>close()</code>, you shouldn't use the SQLRunner 
+		 * instance anymore. Instead, create a new SQLRunner object if you need to 
+		 * access the same database again.</p>
+		 * 
 		 * @param	resultHandler	A function that's called when connections are closed.
 		 * 							No argument values are passed to the function.
 		 */
