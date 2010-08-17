@@ -71,6 +71,7 @@ package com.probertson.data.sqlRunnerClasses
 			
 			_pool = pool;
 			_conn = connection;
+			_conn.addEventListener(SQLErrorEvent.ERROR, conn_error);
 			_numStatements = _batch.length;
 			
 			if (_numStatements > 1)
@@ -194,6 +195,12 @@ package com.probertson.data.sqlRunnerClasses
 		
 		private function conn_error(event:SQLErrorEvent):void
 		{
+			if (event.target is SQLStatement)
+			{
+				SQLStatement(event.target).removeEventListener(SQLEvent.RESULT, stmt_result);
+				SQLStatement(event.target).removeEventListener(SQLErrorEvent.ERROR, conn_error);
+			}
+			
 			_error = event.error;
 			rollbackTransaction();
 		}
@@ -243,6 +250,7 @@ package com.probertson.data.sqlRunnerClasses
 		{
 			_pool.returnConnection(_conn);
 			
+			_conn.removeEventListener(SQLErrorEvent.ERROR, conn_error);
 			_conn = null;
 			_pool = null;
 			_batch = null;

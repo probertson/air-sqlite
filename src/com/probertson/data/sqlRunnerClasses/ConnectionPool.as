@@ -31,6 +31,8 @@ package com.probertson.data.sqlRunnerClasses
 {
 	import flash.data.SQLConnection;
 	import flash.data.SQLMode;
+	import flash.errors.SQLErrorOperation;
+	import flash.events.SQLErrorEvent;
 	import flash.events.SQLEvent;
 	import flash.filesystem.File;
 	import flash.utils.Dictionary;
@@ -68,6 +70,7 @@ package com.probertson.data.sqlRunnerClasses
 		// Closing
 		private var _pendingClose:Boolean = false;
 		private var _pendingCloseHandler:Function;
+		private var _pendingCloseErrorHandler:Function;
 		private var _pendingCloseCount:int = 0;
 		
 		
@@ -76,6 +79,16 @@ package com.probertson.data.sqlRunnerClasses
 		public function get numConnections():int
 		{
 			return _totalConnections;
+		}
+		
+		
+		private var _connectionErrorHandler:Function;
+		public function get connectionErrorHandler():Function { return _connectionErrorHandler; }
+		public function set connectionErrorHandler(value:Function):void
+		{
+			if (_connectionErrorHandler == value)
+				return;
+			_connectionErrorHandler = value;
 		}
 		
 		
@@ -126,6 +139,7 @@ package com.probertson.data.sqlRunnerClasses
 			{
 				_blockingConnection = new SQLConnection();
 				_blockingConnection.addEventListener(SQLEvent.OPEN, conn_open);
+				_blockingConnection.addEventListener(SQLErrorEvent.ERROR, conn_openError);
 				_blockingConnection.openAsync(_dbFile);
 			}
 			else
@@ -135,10 +149,11 @@ package com.probertson.data.sqlRunnerClasses
 		}
 		
 		
-		public function close(handler:Function):void
+		public function close(handler:Function, errorHandler:Function):void
 		{
 			_pendingClose = true;
 			_pendingCloseHandler = handler;
+			_pendingCloseErrorHandler = errorHandler;
 			
 			checkPending();
 		}
@@ -219,6 +234,7 @@ package com.probertson.data.sqlRunnerClasses
 					_totalConnections++;
 					conn = new SQLConnection();
 					conn.addEventListener(SQLEvent.OPEN, conn_open);
+					conn.addEventListener(SQLErrorEvent.ERROR, conn_openError);
 					conn.openAsync(_dbFile, SQLMode.READ);
 					return;
 				}
@@ -257,6 +273,8 @@ package com.probertson.data.sqlRunnerClasses
 		{
 			var conn:SQLConnection = event.target as SQLConnection;
 			conn.removeEventListener(SQLEvent.OPEN, conn_open);
+			conn.removeEventListener(SQLErrorEvent.ERROR, conn_openError);
+			
 			if (conn != _blockingConnection)
 			{
 				_numConnectionsBeingOpened--;
@@ -269,6 +287,29 @@ package com.probertson.data.sqlRunnerClasses
 		}
 		
 		
+		private function conn_openError(event:SQLErrorEvent):void
+		{
+			// only handle open errors. Close errors are handled by the close 
+			// error handler. Errors that happen during
+			// statement operations (such as begin, commit, rollback, execute) 
+			// are handled by the statement error handlers.
+			if (event.error.operation != SQLErrorOperation.OPEN)
+				return;
+			
+			if (_connectionErrorHandler != null)
+			{
+				_connectionErrorHandler(event.error);
+				var conn:SQLConnection = SQLConnection(event.target);
+				conn.removeEventListener(SQLErrorEvent.ERROR, conn_openError);
+				conn.removeEventListener(SQLEvent.OPEN, conn_open);
+			}
+			else
+			{
+				throw(event.error);
+			}
+		}
+		
+		
 		private function closeAll():void
 		{
 			_pendingCloseCount = 0;
@@ -276,6 +317,7 @@ package com.probertson.data.sqlRunnerClasses
 			for each (var conn:SQLConnection in _available)
 			{
 				conn.addEventListener(SQLEvent.CLOSE, conn_close);
+				conn.addEventListener(SQLErrorEvent.ERROR, conn_closeError);
 				conn.close();
 				_pendingCloseCount++;
 			}
@@ -298,6 +340,7 @@ package com.probertson.data.sqlRunnerClasses
 		{
 			var conn:SQLConnection = event.target as SQLConnection;
 			conn.removeEventListener(SQLEvent.CLOSE, conn_close);
+			conn.removeEventListener(SQLErrorEvent.ERROR, conn_closeError);
 			
 			_pendingCloseCount--;
 			
@@ -305,6 +348,16 @@ package com.probertson.data.sqlRunnerClasses
 			{
 				_finishClosing();
 			}
+		}
+		
+		
+		private function conn_closeError(event:SQLErrorEvent):void
+		{
+			var conn:SQLConnection = event.target as SQLConnection;
+			conn.removeEventListener(SQLEvent.CLOSE, conn_close);
+			conn.removeEventListener(SQLErrorEvent.ERROR, conn_closeError);
+			
+			_pendingCloseErrorHandler(event.error);
 		}
 		
 		

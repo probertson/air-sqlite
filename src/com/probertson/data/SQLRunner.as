@@ -65,6 +65,25 @@ package com.probertson.data
 		}
 		
 		
+		/**
+		 * Set this property to a function that is called when an error happens 
+		 * while attempting to open a database connection.
+		 * 
+		 * <p>When an error occurs while trying to connect to a database, the specified function is
+		 * called with one argument, the SQLError object for the error. If no function
+		 * is specified for this property, the error is thrown, resulting in an 
+		 * unhandled error in a debugger environment.</p>
+		 */
+		public function get connectionErrorHandler():Function
+		{
+			return _connectionPool.connectionErrorHandler;
+		}
+		public function set connectionErrorHandler(value:Function):void
+		{
+			_connectionPool.connectionErrorHandler = value;
+		}
+		
+		
 		// ------- Public methods -------
 		
 		/**
@@ -156,10 +175,14 @@ package com.probertson.data
 		 * 
 		 * @param	resultHandler	A function that's called when connections are closed.
 		 * 							No argument values are passed to the function.
+		 * 
+		 * @param	errorHandler	A function that's called when an error occurs during
+		 * 							the close operation. A SQLError object is passed as
+		 * 							an argument to the function.
 		 */
-		public function close(resultHandler:Function):void
+		public function close(resultHandler:Function, errorHandler:Function=null):void
 		{
-			_connectionPool.close(resultHandler);
+			_connectionPool.close(resultHandler, errorHandler);
 		}
 	}
 }
