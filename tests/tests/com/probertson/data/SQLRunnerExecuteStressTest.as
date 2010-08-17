@@ -75,10 +75,10 @@ package tests.com.probertson.data
 		
 		// ------- Tests -------
 		
-		[Test(async, timeout="800000")]
+		[Test(async, timeout="500000")]
 		public function testLongRunning():void
 		{
-			addEventListener(Event.COMPLETE, Async.asyncHandler(this, testLongRunning_result2, 800000));
+			addEventListener(Event.COMPLETE, Async.asyncHandler(this, testLongRunning_result2, 500000));
 			
 			_sqlRunner = new SQLRunner(_dbFile);
 			
@@ -90,7 +90,7 @@ package tests.com.probertson.data
 			addTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _timer_timerComplete);
 			addTimer.start();
 			
-			var updateTimer:Timer = new Timer(10, 30000);
+			var updateTimer:Timer = new Timer(10, 20000);
 			updateTimer.addEventListener(TimerEvent.TIMER, _updateTimer_timer);
 			updateTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _timer_timerComplete);
 			updateTimer.start();
