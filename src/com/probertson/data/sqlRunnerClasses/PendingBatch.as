@@ -194,29 +194,7 @@ package com.probertson.data.sqlRunnerClasses
 		
 		private function conn_error(event:SQLErrorEvent):void
 		{
-			// once one error is thrown, a bunch more will be thrown from cancelling
-			// but they should be ignored
-			if (_error == null)
-			{
-				_error = event.error;
-				cancelExecution();
-			}
-		}
-		
-		
-		private function cancelExecution():void
-		{
-			if (_conn.connected)
-			{
-				_conn.addEventListener(SQLEvent.CANCEL, conn_cancel);
-				_conn.cancel();
-			}
-		}
-		
-		
-		private function conn_cancel(event:SQLEvent):void 
-		{
-			_conn.removeEventListener(SQLEvent.CANCEL, conn_cancel);
+			_error = event.error;
 			rollbackTransaction();
 		}
 		
