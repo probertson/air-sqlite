@@ -311,9 +311,14 @@ package com.probertson.data.sqlRunnerClasses
 		private function _finishClosing():void
 		{
 			while (_pending.length > 0)
-			{
 				_pending.shift();
-			}
+			while (_available.length > 0)
+				_available.shift();
+			while (_blockedPending != null && _blockedPending.length > 0)
+				_blockedPending.shift();
+			while (_blockingPending != null && _blockingPending.length > 0)
+				_blockingPending.shift();
+			
 			_blockingConnection = null;
 			
 			_pendingCloseHandler();
