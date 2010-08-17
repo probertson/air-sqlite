@@ -296,12 +296,13 @@ package com.probertson.data.sqlRunnerClasses
 			if (event.error.operation != SQLErrorOperation.OPEN)
 				return;
 			
+			var conn:SQLConnection = SQLConnection(event.target);
+			conn.removeEventListener(SQLErrorEvent.ERROR, conn_openError);
+			conn.removeEventListener(SQLEvent.OPEN, conn_open);
+			
 			if (_connectionErrorHandler != null)
 			{
 				_connectionErrorHandler(event.error);
-				var conn:SQLConnection = SQLConnection(event.target);
-				conn.removeEventListener(SQLErrorEvent.ERROR, conn_openError);
-				conn.removeEventListener(SQLEvent.OPEN, conn_open);
 			}
 			else
 			{
