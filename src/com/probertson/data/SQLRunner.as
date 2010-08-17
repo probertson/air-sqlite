@@ -39,7 +39,7 @@ package com.probertson.data
 		{
 			_connectionPool = new ConnectionPool(databaseFile, maxPoolSize);
 			// create this cache object ahead of time to avoid the overhead
-			// of checking if its null each time execute() is called.
+			// of checking if it's null each time execute() is called.
 			// Other cache objects won't be needed nearly as much, so 
 			// their instantiation can be deferred.
 			_stmtCache = new Object();
@@ -99,6 +99,7 @@ package com.probertson.data
 		/**
 		 * Executes the set of SQL statements defined in the batch Vector. The statements
 		 * are executed within a transaction.
+		 * 
 		 * @param	batch	The set of SQL statements to execute, defined as QueuedStatement
 		 * 					objects.
 		 * @param	resultHandler	The function that's called when the batch processing finishes.
