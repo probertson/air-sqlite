@@ -131,10 +131,6 @@ package tests.com.probertson.data
 				_sqlRunner.executeModify(Vector.<QueuedStatement>([stmt]), testLongRunning_result, testLongRunning_error);
 				_totalExecutions++;
 				_totalUpdate++;
-//				stmt = new QueuedStatement(UPDATE_ROW_SQL, {colIntPK:_latestRowId, colString:getRandomString(), colInt:getRandomInt()});
-//				_sqlRunner.executeModify(Vector.<QueuedStatement>([stmt]), testLongRunning_result, testLongRunning_error);
-//				_totalExecutions++;
-//				_totalUpdate++;
 			}
 		}
 		
@@ -149,7 +145,7 @@ package tests.com.probertson.data
 		private function _progressTimer_timer(event:TimerEvent):void
 		{
 			var time:Number = Math.round(getTimer() / 100) / 10;
-			trace(time, "s,", _totalAdd, "add;", _totalUpdate, "update;", _totalSelect, "select;", _totalComplete, "/", _totalExecutions, (_totalComplete - _lastComplete), "since last");
+//			trace(time, "s,", _totalAdd, "add;", _totalUpdate, "update;", _totalSelect, "select;", _totalComplete, "/", _totalExecutions, (_totalComplete - _lastComplete), "since last");
 			_lastComplete = _totalComplete;
 		}
 		
