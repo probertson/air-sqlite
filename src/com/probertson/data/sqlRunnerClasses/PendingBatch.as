@@ -182,10 +182,10 @@ package com.probertson.data.sqlRunnerClasses
 		
 		private function finish():void
 		{
+			_pool.returnConnection(_conn);
+			
 			if (_resultHandler != null)
-			{
 				_resultHandler(_results);
-			}
 			
 			cleanUp();	
 		}
@@ -215,8 +215,7 @@ package com.probertson.data.sqlRunnerClasses
 			}
 			else
 			{
-				callErrorHandler();
-				cleanUp();
+				_finishError();
 			}
 		}
 		
@@ -224,7 +223,17 @@ package com.probertson.data.sqlRunnerClasses
 		private function conn_rollback(event:SQLEvent):void 
 		{
 			_conn.removeEventListener(SQLEvent.ROLLBACK, conn_rollback);
-			callErrorHandler();
+			_finishError();
+		}
+		
+		
+		private function _finishError():void
+		{
+			_pool.returnConnection(_conn);
+			
+			if (_errorHandler != null)
+				_errorHandler(_error);
+			
 			cleanUp();
 		}
 		
@@ -240,16 +249,8 @@ package com.probertson.data.sqlRunnerClasses
 		}
 		
 		
-		private function callErrorHandler():void
-		{
-			_errorHandler(_error);
-		}
-		
-		
 		private function cleanUp():void
 		{
-			_pool.returnConnection(_conn);
-			
 			_conn.removeEventListener(SQLErrorEvent.ERROR, conn_error);
 			_conn = null;
 			_pool = null;
