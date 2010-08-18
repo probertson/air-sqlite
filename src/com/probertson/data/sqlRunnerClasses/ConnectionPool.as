@@ -102,7 +102,7 @@ package com.probertson.data.sqlRunnerClasses
 		public function addPendingStatement(pendingStatement:PendingStatement):void
 		{
 			// TODO: throw an error or dispatch an event if there is a pending close
-			if (_blockingPending == null || _blockingPending.length == 0)
+			if (!_blocked)
 			{
 				_pending.push(pendingStatement);
 				checkPending();
