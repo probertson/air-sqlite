@@ -30,6 +30,7 @@ package com.probertson.data
 	import com.probertson.data.sqlRunnerClasses.StatementCache;
 	
 	import flash.data.SQLStatement;
+	import flash.events.FullScreenEvent;
 	import flash.filesystem.File;
 	
 	public class SQLRunner 
@@ -102,7 +103,7 @@ package com.probertson.data
 		 * 						<code>SELECT</code> statement. In the resulting data set, each
 		 * 						result row is represented as an instance of this class.
 		 */
-		public function execute(sql:String, parameters:Object, handler:Function, itemClass:Class=null):void
+		public function execute(sql:String, parameters:Object, handler:Function, itemClass:Class=null, errorHandler:Function=null):void
 		{
 			var stmt:StatementCache = _stmtCache[sql];
 			if (stmt == null)
@@ -110,7 +111,7 @@ package com.probertson.data
 				stmt = new StatementCache(sql);
 				_stmtCache[sql] = stmt;
 			}
-			var pending:PendingStatement = new PendingStatement(stmt, parameters, handler, itemClass);
+			var pending:PendingStatement = new PendingStatement(stmt, parameters, handler, itemClass, errorHandler);
 			_connectionPool.addPendingStatement(pending);
 		}
 		
