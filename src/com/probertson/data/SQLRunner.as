@@ -95,13 +95,17 @@ package com.probertson.data
 		 * @param	sql	The text of the SQL statement to execute.
 		 * @param	parameters	An object whose properties contain the values of the parameters
 		 * 						that are used in executing the SQL statement.
-		 * @param	handler		The callback function that's called when the statement execution
-		 * 						finishes. This function should define one parameter, a SQLResult 
-		 * 						object. When the statement is executed, the SQLResult object containing 
-		 * 						the results of the statement execution is passed to this function.
+		 * @param	handler	The callback function that's called when the statement execution
+		 * 					finishes. This function should define one parameter, a SQLResult 
+		 * 					object. When the statement is executed, the SQLResult object containing 
+		 * 					the results of the statement execution is passed to this function.
 		 * @param	itemClass	A class that has properties corresponding to the columns in the 
 		 * 						<code>SELECT</code> statement. In the resulting data set, each
 		 * 						result row is represented as an instance of this class.
+		 * @param	errorHandler	The callback function that's called when an error occurs
+		 * 							during the statement's execution. A single argument is passed
+		 * 							to the errorHandler function: a SQLError object containing 
+		 * 							information about the error that happened.
 		 */
 		public function execute(sql:String, parameters:Object, handler:Function, itemClass:Class=null, errorHandler:Function=null):void
 		{
