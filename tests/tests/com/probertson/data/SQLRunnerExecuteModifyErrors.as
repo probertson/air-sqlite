@@ -8,8 +8,11 @@ package tests.com.probertson.data
 	
 	import flash.data.SQLResult;
 	import flash.errors.SQLError;
+	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.events.TimerEvent;
 	import flash.filesystem.File;
+	import flash.utils.Timer;
 	
 	import flexunit.framework.Assert;
 	
@@ -28,6 +31,7 @@ package tests.com.probertson.data
 		private var _dbFile:File;
 		private var _errorCount:int = 0;
 		private var _expectedErrors:int = 0;
+		private var _delayBeforeAssert:Timer;
 		
 		
 		// ------- Setup/cleanup -------
@@ -41,6 +45,7 @@ package tests.com.probertson.data
 			
 			_errorCount = 0;
 			_expectedErrors = 0;
+			_delayBeforeAssert = new Timer(2000);
 		}
 		
 		
@@ -129,10 +134,10 @@ package tests.com.probertson.data
 		
 		// ----- Multiple statements in a batch, followed by a SELECT -----
 		
-		[Test(async, timeout="500")]
+		[Test(async, timeout="5000")]
 		public function testMultipleStatementsPlusSelectErrorHandling():void
 		{
-			addEventListener(ExecuteResultEvent.RESULT, Async.asyncHandler(this, testMultipleStatementsPlusSelectErrorHandling_result2, 500));
+			addEventListener(Event.COMPLETE, Async.asyncHandler(this, testMultipleStatementsPlusSelectErrorHandling_result2, 5000));
 			
 			_sqlRunner = new SQLRunner(_dbFile);
 			var stmt:QueuedStatement = new QueuedStatement(INSERT_ERROR_SQL, {colString:"Hello", colInt:7});
@@ -140,7 +145,12 @@ package tests.com.probertson.data
 			_sqlRunner.executeModify(Vector.<QueuedStatement>([stmt, stmt2]), testMultipleStatementsPlusSelectErrorHandling_executeModifyResult, testMultipleStatementsPlusSelectErrorHandling_error);
 			_expectedErrors = 1;
 			_sqlRunner.execute(LOAD_ROWS_LIMIT_SQL, null, testMultipleStatementsPlusSelectErrorHandling_executeResult);
+			
+			_delayBeforeAssert.delay = 2000;
+			_delayBeforeAssert.addEventListener(TimerEvent.TIMER, testMultipleStatementsPlusSelectErrorHandling_timer);
+			_delayBeforeAssert.start();
 		}
+		
 		
 		// --- handlers ---
 		
@@ -154,14 +164,25 @@ package tests.com.probertson.data
 			Assert.fail("Expected an error but none occurred");
 		}
 		
+		private var _executeComplete:Boolean = false;
+		
 		private function testMultipleStatementsPlusSelectErrorHandling_executeResult(result:SQLResult):void
 		{
-			dispatchEvent(new ExecuteResultEvent(ExecuteResultEvent.RESULT, result));
+			_executeComplete = true;
 		}
 		
-		private function testMultipleStatementsPlusSelectErrorHandling_result2(event:ExecuteResultEvent, passThroughData:Object):void
+		private function testMultipleStatementsPlusSelectErrorHandling_timer(event:TimerEvent):void
+		{
+			_delayBeforeAssert.removeEventListener(TimerEvent.TIMER, testMultipleStatementsPlusSelectErrorHandling_timer);
+			_delayBeforeAssert.stop();
+			
+			dispatchEvent(new Event(Event.COMPLETE));
+		}
+		
+		private function testMultipleStatementsPlusSelectErrorHandling_result2(event:Event, passThroughData:Object):void
 		{
 			Assert.assertEquals(_expectedErrors, _errorCount);
+			Assert.assertTrue(_executeComplete);
 		}
 		
 		
