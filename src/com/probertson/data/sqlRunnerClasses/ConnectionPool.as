@@ -354,6 +354,9 @@ package com.probertson.data.sqlRunnerClasses
 		
 		private function conn_closeError(event:SQLErrorEvent):void
 		{
+			if (event.error.operation != SQLErrorOperation.CLOSE)
+				return;
+			
 			var conn:SQLConnection = event.target as SQLConnection;
 			conn.removeEventListener(SQLEvent.CLOSE, conn_close);
 			conn.removeEventListener(SQLErrorEvent.ERROR, conn_closeError);
