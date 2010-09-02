@@ -25,22 +25,25 @@ THE SOFTWARE.
 package com.probertson.data
 {
 	import com.probertson.data.sqlRunnerClasses.PendingStatementUnpooled;
+	
 	import flash.data.SQLConnection;
+	import flash.data.SQLMode;
 	import flash.data.SQLResult;
 	import flash.data.SQLStatement;
 	import flash.errors.SQLError;
 	import flash.events.SQLErrorEvent;
 	import flash.events.SQLEvent;
 	import flash.filesystem.File;
+	import flash.utils.ByteArray;
 	
 	public class SQLRunnerUnpooled
 	{
 		
-		public function SQLRunnerUnpooled(databaseFile:File) 
+		public function SQLRunnerUnpooled(databaseFile:File, encryptionKey:ByteArray=null) 
 		{
 			_conn = new SQLConnection();
 			_conn.addEventListener(SQLEvent.OPEN, conn_open);
-			_conn.openAsync(databaseFile);
+			_conn.openAsync(databaseFile, SQLMode.CREATE, null, false, 1024, encryptionKey);
 			_inUse = true;
 			
 			// create objects ahead of time to avoid the overhead

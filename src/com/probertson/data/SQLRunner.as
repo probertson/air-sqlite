@@ -32,13 +32,14 @@ package com.probertson.data
 	import flash.data.SQLStatement;
 	import flash.events.FullScreenEvent;
 	import flash.filesystem.File;
+	import flash.utils.ByteArray;
 	
 	public class SQLRunner 
 	{
 		
-		public function SQLRunner(databaseFile:File, maxPoolSize:int=5) 
+		public function SQLRunner(databaseFile:File, maxPoolSize:int=5, encryptionKey:ByteArray=null) 
 		{
-			_connectionPool = new ConnectionPool(databaseFile, maxPoolSize);
+			_connectionPool = new ConnectionPool(databaseFile, maxPoolSize, encryptionKey);
 			// create this cache object ahead of time to avoid the overhead
 			// of checking if it's null each time execute() is called.
 			// Other cache objects won't be needed nearly as much, so 
