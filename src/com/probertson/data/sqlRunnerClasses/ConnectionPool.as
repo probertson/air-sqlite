@@ -137,6 +137,7 @@ package com.probertson.data.sqlRunnerClasses
 			
 			if (_blockingConnection == null)
 			{
+				_blocked = true;
 				_blockingConnection = new SQLConnection();
 				_blockingConnection.addEventListener(SQLEvent.OPEN, conn_open);
 				_blockingConnection.addEventListener(SQLErrorEvent.ERROR, conn_openError);
@@ -282,6 +283,7 @@ package com.probertson.data.sqlRunnerClasses
 			}
 			else
 			{
+				_blocked = false;
 				checkPending();
 			}
 		}
