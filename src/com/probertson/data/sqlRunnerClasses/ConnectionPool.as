@@ -143,7 +143,11 @@ package com.probertson.data.sqlRunnerClasses
 				_blockingConnection = new SQLConnection();
 				_blockingConnection.addEventListener(SQLEvent.OPEN, conn_open);
 				_blockingConnection.addEventListener(SQLErrorEvent.ERROR, conn_openError);
-				_blockingConnection.openAsync(_dbFile, SQLMode.CREATE, null, false, 1024, _encryptionKey);
+				
+				// Use the UPDATE flag to be able to modify while using an encrypted key.
+				// this does not open an encrypted database unless a) the database exists and 
+				// is encrypted b) _encryptionKey is not null, otherwise it executes normally
+				_blockingConnection.openAsync(_dbFile, SQLMode.UPDATE, null, false, 1024, _encryptionKey);
 			}
 			else
 			{
@@ -238,7 +242,13 @@ package com.probertson.data.sqlRunnerClasses
 					conn = new SQLConnection();
 					conn.addEventListener(SQLEvent.OPEN, conn_open);
 					conn.addEventListener(SQLErrorEvent.ERROR, conn_openError);
-					conn.openAsync(_dbFile, SQLMode.READ, null, false, 1024, _encryptionKey);
+					
+					// If there is an _encryptionKey, use it to open.  Otherwise it will be null
+					// so passing it in as null will open a normal DB file
+					// This should be an UPDATE flag because not all write statements will 
+					// be forced to go through a blocking command, which would cause those other
+					// statements to fail
+					conn.openAsync(_dbFile, SQLMode.UPDATE, null, false, 1024, _encryptionKey);
 					return;
 				}
 				else
