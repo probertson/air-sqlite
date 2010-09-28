@@ -37,6 +37,7 @@ package com.probertson.data
 	
 	public class SQLRunner 
 	{
+		// ------- Constructor -------
 		
 		public function SQLRunner(databaseFile:File, maxPoolSize:int=5, encryptionKey:ByteArray=null) 
 		{

@@ -1,13 +1,17 @@
 package tests.com.probertson.data
 {
+	import com.probertson.data.QueuedStatement;
 	import com.probertson.data.SQLRunner;
 	
 	import events.ExecuteResultEvent;
 	
 	import flash.data.SQLResult;
 	import flash.errors.SQLError;
+	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.events.TimerEvent;
 	import flash.filesystem.File;
+	import flash.utils.Timer;
 	
 	import flexunit.framework.Assert;
 	
@@ -24,6 +28,7 @@ package tests.com.probertson.data
 		// ------- Instance vars -------
 		
 		private var _dbFile:File;
+		private var _testCompleteTimer:Timer;
 		
 		
 		// ------- Setup/cleanup -------
@@ -106,6 +111,104 @@ package tests.com.probertson.data
 		}
 		
 		
+		// ----- SELECT added while INSERT/UPDATE/DELETE is running -----
+		
+		[Ignore("This test isn't working. It should probably be rewritten as a test of the ConnectionPool class")]
+		[Test(async, timeout="3000")]
+		public function testExecuteDuringExecuteModify():void
+		{
+			addEventListener(Event.COMPLETE, Async.asyncHandler(this, testExecuteDuringExecuteModify_complete, 3000));
+			
+			_sqlRunner = new SQLRunner(_dbFile);
+			
+			_testCompleteTimer = new Timer(2000);
+			_testCompleteTimer.addEventListener(TimerEvent.TIMER, testExecuteDuringExecuteModify_timer);
+			_testCompleteTimer.start();
+			
+			// pre-create the SQLConnections
+			var stmt:QueuedStatement = new QueuedStatement(ADD_ROW_SQL, {colString:"Hello", colInt:7});
+			_sqlRunner.executeModify(Vector.<QueuedStatement>([stmt]), testExecuteDuringExecuteModify_preCreate1Result, testExecuteDuringExecuteModify_preCreate1Error);
+		}
+		
+		
+		// --- handlers ---
+		
+		private function testExecuteDuringExecuteModify_preCreate1Result(results:Vector.<SQLResult>):void
+		{
+			// pre-create the execute() connection
+			_sqlRunner.execute(LOAD_ROWS_LIMIT_SQL, null, testExecuteDuringExecuteModify_preCreate2Result, null, testExecuteDuringExecuteModify_preCreate2Error);
+		}
+		
+		private function testExecuteDuringExecuteModify_preCreate1Error(error:SQLError):void
+		{
+			Assert.fail("An error occurred while pre-creating the executeModify connection");
+		}
+		
+		private function testExecuteDuringExecuteModify_preCreate2Result(result:SQLResult):void
+		{
+			// execute the modify statement that's actually part of the test
+			var stmt1:QueuedStatement = new QueuedStatement(ADD_ROW_SQL, {colString:"Hello", colInt:7});
+			var stmt2:QueuedStatement = new QueuedStatement(ADD_ROW_SQL, {colString:"World", colInt:17});
+			var stmt3:QueuedStatement = new QueuedStatement(ADD_ROW_SQL, {colString:"Hello", colInt:7});
+			var stmt4:QueuedStatement = new QueuedStatement(ADD_ROW_SQL, {colString:"World", colInt:17});
+			var stmt5:QueuedStatement = new QueuedStatement(ADD_ROW_SQL, {colString:"Hello", colInt:7});
+			var stmt6:QueuedStatement = new QueuedStatement(ADD_ROW_SQL, {colString:"World", colInt:17});
+			_sqlRunner.executeModify(Vector.<QueuedStatement>([stmt1, stmt2, stmt3, stmt4, stmt5, stmt6]), testExecuteDuringExecuteModify_executeModifyResult, testExecuteDuringExecuteModify_executeModifyError, testExecuteDuringExecuteModify_executeModifyProgress);
+		}
+		
+		private function testExecuteDuringExecuteModify_preCreate2Error(error:SQLError):void
+		{
+			Assert.fail("An error occurred while pre-creating the executeModify connection");
+		}
+		
+		private var _executeModifyComplete:Boolean = false;
+		private function testExecuteDuringExecuteModify_executeModifyResult(results:Vector.<SQLResult>):void
+		{
+			_executeModifyComplete = true;
+		}
+		
+		private var _executeCalled:Boolean = false;
+		private function testExecuteDuringExecuteModify_executeModifyProgress(complete:uint, total:uint):void
+		{
+			// call execute() here, so we know we're in the middle of the transaction
+			if (!_executeCalled && complete > 2)
+			{
+				_executeCalled = true;
+				_sqlRunner.execute(LOAD_ROWS_LIMIT_SQL, null, testExecuteDuringExecuteModify_executeResult, null, testExecuteDuringExecuteModify_executeError);
+			}
+		}
+		
+		private function testExecuteDuringExecuteModify_executeModifyError(error:SQLError):void
+		{
+			Assert.fail("Error during executeModify() statement");
+		}
+		
+		private var _executeComplete:Boolean = false;
+		private function testExecuteDuringExecuteModify_executeResult(result:SQLResult):void
+		{
+			_executeComplete = true;
+		}
+		
+		private function testExecuteDuringExecuteModify_executeError(error:SQLError):void
+		{
+			Assert.fail("Error during execute() call");
+		}
+		
+		private function testExecuteDuringExecuteModify_timer(event:TimerEvent):void
+		{
+			_testCompleteTimer.removeEventListener(TimerEvent.TIMER, testExecuteDuringExecuteModify_timer);
+			_testCompleteTimer.stop();
+			
+			dispatchEvent(new Event(Event.COMPLETE));
+		}
+		
+		private function testExecuteDuringExecuteModify_complete(event:Event, passThroughData:Object):void
+		{
+			Assert.assertTrue(_executeModifyComplete && _executeComplete);
+		}
+		
+		
+
 		// ----- LIMIT statement -----
 		
 		[Test(async, timeout="500")]
@@ -219,5 +322,9 @@ package tests.com.probertson.data
 		[Embed(source="sql/LoadRowsParameterizedLimitOffset.sql", mimeType="application/octet-stream")]
 		private static const LoadRowsParameterizedLimitOffsetStatementText:Class;
 		private static const LOAD_ROWS_PARAMETERIZED_LIMIT_OFFSET_SQL:String = new LoadRowsParameterizedLimitOffsetStatementText();
+		
+		[Embed(source="sql/AddRow.sql", mimeType="application/octet-stream")]
+		private static const AddRowStatementText:Class;
+		private static const ADD_ROW_SQL:String = new AddRowStatementText();
 	}
 }
