@@ -33,9 +33,26 @@ package com.probertson.data
 	import flash.events.SQLEvent;
 	import flash.filesystem.File;
 	
+	/**
+	 * The SQLRunnerUnpooled class executes SQL statements against a database. 
+	 * Unlike with the SQLRunner class, the SQLRunnerUnpooled class only uses
+	 * one SQLConnection instance for all operations including SELECT
+	 * statements. This minimizes the memory and processor footprint although
+	 * it increases the delay when executing multiple statements at the same time.
+	 * The SQLRunnerUnpooled class is intended to be used in situations where memory
+	 * and processor power are limited, such as with mobile devices.
+	 * 
+	 * <p>To execute a statement, call the <code>execute()</code> method.</p>
+	 * 
+	 * @see SQLRunner
+	 */
 	public class SQLRunnerUnpooled
 	{
-		
+		/**
+		 * Creates a SQLRunnerUnpooled instance.
+		 * 
+		 * @param databaseFile	The database to use for executing statements.
+		 */
 		public function SQLRunnerUnpooled(databaseFile:File) 
 		{
 			_conn = new SQLConnection();
@@ -81,6 +98,8 @@ package com.probertson.data
 		 * @param	itemClass	A class that has properties corresponding to the columns in the 
 		 * 						<code>SELECT</code> statement. In the resulting data set, each
 		 * 						result row is represented as an instance of this class.
+		 * 
+		 * @see Responder
 		 */
 		public function execute(sql:String, parameters:Object, responder:Responder, itemClass:Class=null):void
 		{

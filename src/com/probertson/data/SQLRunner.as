@@ -33,10 +33,108 @@ package com.probertson.data
 	import flash.events.FullScreenEvent;
 	import flash.filesystem.File;
 	
+	/**
+	 * The SQLRunner class executes SQL statements against a database using a 
+	 * pool of database connections to improve execution speed. SELECT
+	 * statements are executed using a pool of connections. Because each 
+	 * database connection executes in its own thread, this allows multiple
+	 * statements to execute at the same time. To optimize query performance,
+	 * statement objects are cached and reused when running the same query 
+	 * multiple times.
+	 * 
+	 * <p>To execute a SELECT statement, call the <code>execute()</code> method.</p>
+	 * 
+	 * <p>To execute an INSERT, UPDATE, or DELETE statement (or several of those
+	 * together in a transaction) call the <code>executeModify()</code> method.</p>
+	 * 
+	 * <p>Here is a basic usage example for a SELECT statement, which is done using the 
+	 * <code>execute()</code> method:</p>
+	 * 
+	 * <ol>
+	 *   <li>Create a File object containing the location of the database file.</li>
+	 *   <li>Create the SQLRunner instance</li>
+	 *   <li>Call the <code>execute()</code> method, passing in the SQL, an object with parameter values, and the result handler method.</li>
+	 * </ol>
+	 * 
+	 * <listing>
+	 * // setup code:
+	 * // define database file location
+	 * var dbFile:File = File.applicationStorageDirectory.resolvePath("myDatabase.db");
+	 * // create the SQLRunner
+	 * var sqlRunner:SQLRunner = new SQLRunner(dbFile);
+	 * 
+	 * // ...
+	 * 
+	 * // run the statement, passing in one parameter (":employeeId" in the SQL)
+	 * // the statement returns an Employee object as defined in the 4th parameter
+	 * sqlRunner.execute(LOAD_EMPLOYEE_SQL, {employeeId:102}, resultHandler, Employee);
+	 * 
+	 * private function resultHandler(result:SQLResult):void
+	 * {
+	 *     var employee:Employee = result.data[0];
+	 *     // do something with the employee data
+	 * }
+	 * 
+	 * // constant for actual SQL statement text
+	 * [Embed(source="sql/LoadEmployee.sql", mimeType="application/octet-stream")]
+	 * private static const LoadEmployeeStatementText:Class;
+	 * private static const LOAD_EMPLOYEE_SQL:String = new LoadEmployeeStatementText();
+	 * </listing>
+	 * 
+	 * <p>Here is a basic example for an INSERT/UPDATE/DELETE statement. To execute those 
+	 * statements use the executeModify() method. <code>The executeModify()</code> method accepts a 
+	 * "batch" of statements (a Vector of QueuedStatement objects). If you pass more than 
+	 * one statement together in a batch, the batch executes as a single transaction.</p>
+	 * 
+	 * <listing>
+	 * // run the statement, passing in one parameter (":employeeId" in the SQL)
+	 * // the statement returns an Employee object as defined in the 4th parameter
+	 * var insert:QueuedStatement = new QueuedStatement(INSERT_EMPLOYEE_SQL, {firstName:"John", lastName:"Smith"});
+	 * var update:QueuedStatement = new QueuedStatement(UPDATE_EMPLOYEE_SALARY_SQL, {employeeId:100, salary:1000});
+	 * var statementBatch:Vector.&lt;QueuedStatement&gt; = Vector.&lt;QueuedStatement&gt;([insert, update]);
+	 * 
+	 * sqlRunner.executeModify(statementBatch, resultHandler, errorHandler, progressHandler);
+	 * 
+	 * private function resultHandler(results:Vector.&lt;SQLResult&gt;):void
+	 * {
+	 *      // all operations done
+	 * }
+	 * 
+	 * private function errorHandler(error:SQLError):void
+	 * {
+	 *     // something went wrong
+	 * }
+	 * 
+	 * private function progressHandler(numStepsComplete:uint, totalSteps:uint):void
+	 * {
+	 *     var progressPercent:int = numStepsComplete / totalSteps;
+	 * }
+	 * 
+	 * // constants for actual SQL statement text
+	 * [Embed(source="sql/InsertEmployee.sql", mimeType="application/octet-stream")]
+	 * private static const InsertEmployeeStatementText:Class;
+	 * private static const INSERT_EMPLOYEE_SQL:String = new InsertEmployeeStatementText();
+	 * 
+	 * [Embed(source="sql/UpdateEmployeeSalary.sql", mimeType="application/octet-stream")]
+	 * private static const UpdateEmployeeSalaryStatementText:Class;
+	 * private static const UPDATE_EMPLOYEE_SALARY_SQL:String = new UpdateEmployeeSalaryStatementText();    
+	 * </listing>
+	 */
 	public class SQLRunner 
 	{
 		// ------- Constructor -------
 		
+		/**
+		 * Creates a SQLRunner instance.
+		 * 
+		 * @param databaseFile The file location of the database. If a database doesn't
+		 * 					   exist at that location it is created.
+		 * @param maxPoolSize The maximum number of SQLConnection instances to 
+		 * 					  use to execute SELECT statements. More connections
+		 * 					  in the pool means more statements execute at the
+		 * 					  same time, which increases speed but also increases
+		 * 					  memory and processor use. The default pool size is 5.
+		 */
 		public function SQLRunner(databaseFile:File, maxPoolSize:int=5) 
 		{
 			_connectionPool = new ConnectionPool(databaseFile, maxPoolSize);
@@ -58,8 +156,9 @@ package com.probertson.data
 		// ------- Public properties -------
 		
 		/**
-		 * The total number of database connections either in the pool
-		 * or in use.
+		 * The total number of database connections currently created. This 
+		 * includes connections in the pool (waiting to be used) as well as
+		 * connections that are currently in use.
 		 */
 		public function get numConnections():int
 		{
@@ -68,7 +167,7 @@ package com.probertson.data
 		
 		
 		/**
-		 * Set this property to a function that is called when an error happens 
+		 * Set this property to specify a function that is called when an error happens 
 		 * while attempting to open a database connection.
 		 * 
 		 * <p>When an error occurs while trying to connect to a database, the specified function is
