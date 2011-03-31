@@ -1,8 +1,26 @@
+####
+# OSX
+####
 *.DS_Store
+
+####
+# FlashDevelop
+####
 /air-sqlite.as3proj
+
+####
+# FlashBuilder
+####
 /.settings
 /bin
 /lib
 /.actionScriptProperties
 /.flexLibProperties
 /.project
+
+####
+# FlexUnit
+####
+/.FlexUnitSettings
+*/FlexUnitApplication.mxml
+*/FlexUnitApplication-app.xml
