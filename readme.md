@@ -1,8 +1,9 @@
 The air-sqlite project is a set of utility classes to make it easier to work with
-SQLite databases using Adobe AIR while following best practices for performance.
+SQLite databases using Adobe AIR while following good practices for performance.
 
 Reference documentation is available here: [air-sqlite language reference "asdocs"](http://probertson.com/resources/projects/air-sqlite/asdoc/)
-For more information see the project page here: [air-sqlite project page](http://probertson.com/projects/air-sqlite/)
+
+For more information about the design philosophy see the project page here: [air-sqlite project page](http://probertson.com/projects/air-sqlite/)
 
 The primary utility is the SQLRunner class, which provides a way to execute SQL statements.
 The statements are executed using a pool of database connections so SELECT statements
