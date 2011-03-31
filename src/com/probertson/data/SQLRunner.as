@@ -87,8 +87,6 @@ package com.probertson.data
 	 * one statement together in a batch, the batch executes as a single transaction.</p>
 	 * 
 	 * <listing>
-	 * // run the statement, passing in one parameter (":employeeId" in the SQL)
-	 * // the statement returns an Employee object as defined in the 4th parameter
 	 * var insert:QueuedStatement = new QueuedStatement(INSERT_EMPLOYEE_SQL, {firstName:"John", lastName:"Smith"});
 	 * var update:QueuedStatement = new QueuedStatement(UPDATE_EMPLOYEE_SALARY_SQL, {employeeId:100, salary:1000});
 	 * var statementBatch:Vector.&lt;QueuedStatement&gt; = Vector.&lt;QueuedStatement&gt;([insert, update]);
