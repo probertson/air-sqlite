@@ -75,6 +75,7 @@ package tests.com.probertson.data
 		
 		// ------- Tests -------
 		
+		[Ignore]
 		[Test(async, timeout="500000")]
 		public function testLongRunning():void
 		{

@@ -83,6 +83,37 @@ package tests.com.probertson.data
 		
 		
 		[Test(async, timeout="500")]
+		public function testTwoStatements():void
+		{
+			addEventListener(ExecuteModifyResultEvent.RESULT, Async.asyncHandler(this, testTwoStatements_result2, 500));
+			
+			_sqlRunner = new SQLRunner(_dbFile);
+			var stmt1:QueuedStatement = new QueuedStatement(ADD_ROW_SQL, {colString:"Hello", colInt:7});
+			var stmt2:QueuedStatement = new QueuedStatement(ADD_ROW_SQL, {colString:"World", colInt:9});
+			_sqlRunner.executeModify(Vector.<QueuedStatement>([stmt1, stmt2]), testTwoStatements_result, testTwoStatements_error);
+		}
+		
+		// --- handlers ---
+		
+		private function testTwoStatements_result(results:Vector.<SQLResult>):void
+		{
+			dispatchEvent(new ExecuteModifyResultEvent(ExecuteModifyResultEvent.RESULT, results));
+		}
+		
+		private function testTwoStatements_result2(event:ExecuteModifyResultEvent, passThroughData:Object):void
+		{
+			Assert.assertEquals(2, event.results.length);
+			Assert.assertEquals(1, event.results[0].rowsAffected);
+			Assert.assertEquals(1, event.results[1].rowsAffected);
+		}
+		
+		private function testTwoStatements_error(error:SQLError):void
+		{
+			Assert.fail(error.message);
+		}
+		
+		
+		[Test(async, timeout="500")]
 		public function testReuseStatement():void
 		{
 			addEventListener(ExecuteModifyResultEvent.RESULT, Async.asyncHandler(this, testReuseStatement_result2, 500));

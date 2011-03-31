@@ -98,6 +98,8 @@ package com.probertson.data.sqlRunnerClasses
 		{
 			_conn.removeEventListener(SQLEvent.BEGIN, conn_begin);
 			
+			callProgressHandler();
+			
 			executeStatements();
 		}
 		
@@ -111,8 +113,6 @@ package com.probertson.data.sqlRunnerClasses
 		
 		private function executeNextStatement():void
 		{
-			callProgressHandler();
-			
 			var stmt:SQLStatement = _batch.shift();
 			if (stmt.sqlConnection == null)
 			{
@@ -145,14 +145,14 @@ package com.probertson.data.sqlRunnerClasses
 			
 			_statementsCompleted++;
 			
+			callProgressHandler();
+			
 			if (_statementsCompleted < _numStatements)
 			{
 				executeNextStatement();
 			}
 			else
 			{
-				callProgressHandler();
-				
 				if (_numStatements > 1)
 				{
 					commitTransaction();
@@ -175,6 +175,8 @@ package com.probertson.data.sqlRunnerClasses
 		private function conn_commit(event:SQLEvent):void 
 		{
 			_conn.removeEventListener(SQLEvent.COMMIT, conn_commit);
+			
+			callProgressHandler();
 			
 			finish();
 		}
