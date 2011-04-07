@@ -83,7 +83,7 @@ package com.probertson.data
 		// ------- Public methods -------
 		
 		/**
-		 * Executes a SQL <code>SELECT</code> query asynchronously. If a SQLConnection is 
+		 * Executes a SQL SELECT query asynchronously. If a SQLConnection is 
 		 * available, the query begins executing immediately. Otherwise, it is added to 
 		 * a queue of pending queries that are executed in request order.
 		 * 
@@ -96,7 +96,7 @@ package com.probertson.data
 		 * 						the results of the statement execution is passed to this function. The responder's
 		 * 						status function should define one parameter, a SQLError object.
 		 * @param	itemClass	A class that has properties corresponding to the columns in the 
-		 * 						<code>SELECT</code> statement. In the resulting data set, each
+		 * 						SELECT statement. In the resulting data set, each
 		 * 						result row is represented as an instance of this class.
 		 * 
 		 * @see Responder

@@ -42,10 +42,17 @@ package com.probertson.data
 	 * statement objects are cached and reused when running the same query 
 	 * multiple times.
 	 * 
-	 * <p>To execute a SELECT statement, call the <code>execute()</code> method.</p>
+	 * <p>To execute a SELECT statement, call the <code>execute()</code> method.
+	 * To execute several SELECT statements, just call <code>execute()</code> multiple
+	 * times. The statements will execute in order, using a pool of database 
+	 * connections.</p>
 	 * 
 	 * <p>To execute an INSERT, UPDATE, or DELETE statement (or several of those
-	 * together in a transaction) call the <code>executeModify()</code> method.</p>
+	 * together in a transaction) call the <code>executeModify()</code> method.
+	 * If you pass one statement to <code>executeModify()</code>, it runs in its
+	 * own transaction. If you pass multiple statements as a batch in one 
+	 * <code>executeModify()</code> call, they run as a transaction. Either they
+	 * all succeed or they are all reverted.</p>
 	 * 
 	 * <p>Here is a basic usage example for a SELECT statement, which is done using the 
 	 * <code>execute()</code> method:</p>
@@ -82,7 +89,7 @@ package com.probertson.data
 	 * </listing>
 	 * 
 	 * <p>Here is a basic example for an INSERT/UPDATE/DELETE statement. To execute those 
-	 * statements use the executeModify() method. <code>The executeModify()</code> method accepts a 
+	 * statements use the executeModify() method. The <code>executeModify()</code> method accepts a 
 	 * "batch" of statements (a Vector of QueuedStatement objects). If you pass more than 
 	 * one statement together in a batch, the batch executes as a single transaction.</p>
 	 * 
@@ -186,9 +193,13 @@ package com.probertson.data
 		// ------- Public methods -------
 		
 		/**
-		 * Executes a SQL <code>SELECT</code> query asynchronously. If a SQLConnection is 
+		 * Executes a SQL SELECT query asynchronously. If a SQLConnection is 
 		 * available, the query begins executing immediately. Otherwise, it is added to 
 		 * a queue of pending queries that are executed in request order.
+		 * 
+		 * <p>To execute several SELECT statements, just call <code>execute()</code> multiple
+		 * times. The statements will execute in order, using the pool of database 
+		 * connections.</p>
 		 * 
 		 * @param	sql	The text of the SQL statement to execute.
 		 * @param	parameters	An object whose properties contain the values of the parameters
@@ -198,7 +209,7 @@ package com.probertson.data
 		 * 					object. When the statement is executed, the SQLResult object containing 
 		 * 					the results of the statement execution is passed to this function.
 		 * @param	itemClass	A class that has properties corresponding to the columns in the 
-		 * 						<code>SELECT</code> statement. In the resulting data set, each
+		 * 						SELECT statement. In the resulting data set, each
 		 * 						result row is represented as an instance of this class.
 		 * @param	errorHandler	The callback function that's called when an error occurs
 		 * 							during the statement's execution. A single argument is passed
@@ -219,8 +230,27 @@ package com.probertson.data
 		
 		
 		/**
-		 * Executes the set of SQL statements defined in the batch Vector. The statements
-		 * are executed within a transaction.
+		 * Executes one or more "data modification" statements (INSERT, UPDATE, and
+		 * DELETE statements). Multiple statements can be passed as a batch, in which case
+		 * the statements are executed within a transaction.
+		 * 
+		 * <p>If you pass one statement (a Vector with only one element) to 
+		 * the <code>executeModify()</code> method, it runs in its
+		 * own transaction. If you pass multiple statements as a batch in one 
+		 * <code>executeModify()</code> call, they run as a transaction. Either they
+		 * all succeed or they are all reverted.</p>
+		 * 
+		 * <p>The <code>executeModify()</code> method isn't meant to run SELECT statements.
+		 * If you want to run several SELECT statements at the same time, just call
+		 * the <code>execute()</code> method multiple times, once per statement. If you 
+		 * want to run one or more INSERT or UPDATE statements (for example) and 
+		 * then run a SELECT statement immediately after those statements finish,
+		 * call <code>executeModify()</code> with the INSERT/UPDATE statements 
+		 * and then call <code>execute()</code> with the SELECT statement. (You
+		 * don't need to wait for the <code>executeModify()</code> result before
+		 * calling <code>execute()</code>. The statements will run in the order
+		 * they're called, with the INSERT/UPDATE transaction first and the
+		 * SELECT statement afterward.</p>
 		 * 
 		 * @param	batch	The set of SQL statements to execute, defined as QueuedStatement
 		 * 					objects.
