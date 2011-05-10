@@ -55,8 +55,10 @@ package com.probertson.data.sqlRunnerClasses
 		private var _progressHandler:Function;
 		private var _pool:ConnectionPool;
 		private var _conn:SQLConnection;
-		private var _numStatements:uint;
-		private var _statementsCompleted:uint = 0;
+		private var _numStatements:int = 0;
+		private var _statementsCompleted:int = 0;
+		private var _numSteps:int = 0;
+		private var _stepsCompleted:int = 0;
 		private var _error:SQLError;
 		
 		
@@ -72,10 +74,11 @@ package com.probertson.data.sqlRunnerClasses
 			_pool = pool;
 			_conn = connection;
 			_conn.addEventListener(SQLErrorEvent.ERROR, conn_error);
-			_numStatements = _batch.length;
+			_numStatements = _numSteps = _batch.length;
 			
 			if (_numStatements > 1)
 			{
+				_numSteps += 2; // 2 additional steps for opening and finishing transaction
 				beginTransaction();
 			}
 			else
@@ -244,9 +247,11 @@ package com.probertson.data.sqlRunnerClasses
 		
 		private function callProgressHandler():void
 		{
+			_stepsCompleted++;
+			
 			if (_progressHandler != null)
 			{
-				_progressHandler(_statementsCompleted + 1, _numStatements + 2);
+				_progressHandler(_stepsCompleted, _numSteps);
 			}
 		}
 		

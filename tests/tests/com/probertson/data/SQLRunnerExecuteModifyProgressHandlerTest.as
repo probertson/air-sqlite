@@ -26,6 +26,7 @@ package tests.com.probertson.data
 		
 		private var _dbFile:File;
 		private var _callCount:int = 0;
+		private var _numComplete:int = 0;
 		
 		
 		// ------- Setup/Teardown -------
@@ -110,6 +111,137 @@ package tests.com.probertson.data
 		private function test_withTwoStatements_executeModify_callsProgressHandler_fourTimes_result2(event:ExecuteModifyResultEvent, passThroughData:Object):void
 		{
 			Assert.assertEquals(4, _callCount);
+		}
+		
+		
+		[Test(async, timeout="500")]
+		public function test_withOneStatement_executeModify_callsProgressHandler_withCompleteArgumentEqualToOne():void
+		{
+			addEventListener(ExecuteModifyResultEvent.RESULT, Async.asyncHandler(this, test_withOneStatement_executeModify_callsProgressHandler_withCompleteArgumentEqualToOne_result2, 500));
+			_sqlRunner = new SQLRunner(_dbFile);
+			var stmt1:QueuedStatement = new QueuedStatement(ADD_ROW_SQL, {colString:"Hello", colInt:7});
+			_sqlRunner.executeModify(Vector.<QueuedStatement>([stmt1]),
+				test_withOneStatement_executeModify_callsProgressHandler_withCompleteArgumentEqualToOne_result,
+				null,
+				test_withOneStatement_executeModify_callsProgressHandler_withCompleteArgumentEqualToOne_progress);
+		}
+		
+		private function test_withOneStatement_executeModify_callsProgressHandler_withCompleteArgumentEqualToOne_progress(numComplete:int, total:int):void
+		{
+			if (_callCount == 0)
+			{
+				_numComplete = numComplete;
+			}
+			_callCount++;
+		}
+		
+		private function test_withOneStatement_executeModify_callsProgressHandler_withCompleteArgumentEqualToOne_result(results:Vector.<SQLResult>):void
+		{
+			dispatchEvent(new ExecuteModifyResultEvent(ExecuteModifyResultEvent.RESULT, results));
+		}
+		
+		private function test_withOneStatement_executeModify_callsProgressHandler_withCompleteArgumentEqualToOne_result2(event:ExecuteModifyResultEvent, passThroughData:Object):void
+		{
+			Assert.assertEquals(1, _numComplete);
+		}
+		
+		
+		[Test(async, timeout="500")]
+		public function test_withTwoStatements_executeModify_callsProgressHandlerTheFirstTime_withCompleteArgumentEqualToOne():void
+		{
+			addEventListener(ExecuteModifyResultEvent.RESULT, Async.asyncHandler(this, test_withTwoStatements_executeModify_callsProgressHandlerTheFirstTime_withCompleteArgumentEqualToOne_result2, 500));
+			_sqlRunner = new SQLRunner(_dbFile);
+			var stmt1:QueuedStatement = new QueuedStatement(ADD_ROW_SQL, {colString:"Hello", colInt:7});
+			var stmt2:QueuedStatement = new QueuedStatement(ADD_ROW_SQL, {colString:"Hello", colInt:7});
+			_sqlRunner.executeModify(Vector.<QueuedStatement>([stmt1, stmt2]),
+				test_withTwoStatements_executeModify_callsProgressHandlerTheFirstTime_withCompleteArgumentEqualToOne_result,
+				null,
+				test_withTwoStatements_executeModify_callsProgressHandlerTheFirstTime_withCompleteArgumentEqualToOne_progress);
+		}
+		
+		private function test_withTwoStatements_executeModify_callsProgressHandlerTheFirstTime_withCompleteArgumentEqualToOne_progress(numComplete:int, total:int):void
+		{
+			_callCount++;
+			if (_callCount == 1)
+			{
+				_numComplete = numComplete;
+			}
+		}
+		
+		private function test_withTwoStatements_executeModify_callsProgressHandlerTheFirstTime_withCompleteArgumentEqualToOne_result(results:Vector.<SQLResult>):void
+		{
+			dispatchEvent(new ExecuteModifyResultEvent(ExecuteModifyResultEvent.RESULT, results));
+		}
+		
+		private function test_withTwoStatements_executeModify_callsProgressHandlerTheFirstTime_withCompleteArgumentEqualToOne_result2(event:ExecuteModifyResultEvent, passThroughData:Object):void
+		{
+			Assert.assertEquals(1, _numComplete);
+		}
+		
+		
+		[Test(async, timeout="500")]
+		public function test_withTwoStatements_executeModify_callsProgressHandlerTheSecondTime_withCompleteArgumentEqualToTwo():void
+		{
+			addEventListener(ExecuteModifyResultEvent.RESULT, Async.asyncHandler(this, test_withTwoStatements_executeModify_callsProgressHandlerTheSecondTime_withCompleteArgumentEqualToTwo_result2, 500));
+			_sqlRunner = new SQLRunner(_dbFile);
+			var stmt1:QueuedStatement = new QueuedStatement(ADD_ROW_SQL, {colString:"Hello", colInt:7});
+			var stmt2:QueuedStatement = new QueuedStatement(ADD_ROW_SQL, {colString:"Hello", colInt:7});
+			_sqlRunner.executeModify(Vector.<QueuedStatement>([stmt1, stmt2]),
+				test_withTwoStatements_executeModify_callsProgressHandlerTheSecondTime_withCompleteArgumentEqualToTwo_result,
+				null,
+				test_withTwoStatements_executeModify_callsProgressHandlerTheSecondTime_withCompleteArgumentEqualToTwo_progress);
+		}
+		
+		private function test_withTwoStatements_executeModify_callsProgressHandlerTheSecondTime_withCompleteArgumentEqualToTwo_progress(numComplete:int, total:int):void
+		{
+			_callCount++;
+			if (_callCount == 2)
+			{
+				_numComplete = numComplete;
+			}
+		}
+		
+		private function test_withTwoStatements_executeModify_callsProgressHandlerTheSecondTime_withCompleteArgumentEqualToTwo_result(results:Vector.<SQLResult>):void
+		{
+			dispatchEvent(new ExecuteModifyResultEvent(ExecuteModifyResultEvent.RESULT, results));
+		}
+		
+		private function test_withTwoStatements_executeModify_callsProgressHandlerTheSecondTime_withCompleteArgumentEqualToTwo_result2(event:ExecuteModifyResultEvent, passThroughData:Object):void
+		{
+			Assert.assertEquals(2, _numComplete);
+		}
+		
+		
+		[Test(async, timeout="500")]
+		public function test_withTwoStatements_executeModify_callsProgressHandlerTheThirdTime_withCompleteArgumentEqualToThree():void
+		{
+			addEventListener(ExecuteModifyResultEvent.RESULT, Async.asyncHandler(this, test_withTwoStatements_executeModify_callsProgressHandlerTheThirdTime_withCompleteArgumentEqualToThree_result2, 500));
+			_sqlRunner = new SQLRunner(_dbFile);
+			var stmt1:QueuedStatement = new QueuedStatement(ADD_ROW_SQL, {colString:"Hello", colInt:7});
+			var stmt2:QueuedStatement = new QueuedStatement(ADD_ROW_SQL, {colString:"Hello", colInt:7});
+			_sqlRunner.executeModify(Vector.<QueuedStatement>([stmt1, stmt2]),
+				test_withTwoStatements_executeModify_callsProgressHandlerTheThirdTime_withCompleteArgumentEqualToThree_result,
+				null,
+				test_withTwoStatements_executeModify_callsProgressHandlerTheThirdTime_withCompleteArgumentEqualToThree_progress);
+		}
+		
+		private function test_withTwoStatements_executeModify_callsProgressHandlerTheThirdTime_withCompleteArgumentEqualToThree_progress(numComplete:int, total:int):void
+		{
+			_callCount++;
+			if (_callCount == 3)
+			{
+				_numComplete = numComplete;
+			}
+		}
+		
+		private function test_withTwoStatements_executeModify_callsProgressHandlerTheThirdTime_withCompleteArgumentEqualToThree_result(results:Vector.<SQLResult>):void
+		{
+			dispatchEvent(new ExecuteModifyResultEvent(ExecuteModifyResultEvent.RESULT, results));
+		}
+		
+		private function test_withTwoStatements_executeModify_callsProgressHandlerTheThirdTime_withCompleteArgumentEqualToThree_result2(event:ExecuteModifyResultEvent, passThroughData:Object):void
+		{
+			Assert.assertEquals(3, _numComplete);
 		}
 		
 		
