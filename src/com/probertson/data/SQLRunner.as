@@ -250,7 +250,7 @@ package com.probertson.data
 		 * don't need to wait for the <code>executeModify()</code> result before
 		 * calling <code>execute()</code>. The statements will run in the order
 		 * they're called, with the INSERT/UPDATE transaction first and the
-		 * SELECT statement afterward.</p>
+		 * SELECT statement afterward.)</p>
 		 * 
 		 * @param	batch	The set of SQL statements to execute, defined as QueuedStatement
 		 * 					objects.
