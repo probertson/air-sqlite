@@ -30,8 +30,8 @@ package com.probertson.data
 	import com.probertson.data.sqlRunnerClasses.StatementCache;
 	
 	import flash.data.SQLStatement;
-	import flash.events.FullScreenEvent;
 	import flash.filesystem.File;
+	import flash.utils.ByteArray;
 	
 	/**
 	 * The SQLRunner class executes SQL statements against a database using a 
@@ -140,9 +140,9 @@ package com.probertson.data
 		 * 					  same time, which increases speed but also increases
 		 * 					  memory and processor use. The default pool size is 5.
 		 */
-		public function SQLRunner(databaseFile:File, maxPoolSize:int=5) 
+		public function SQLRunner(databaseFile:File, maxPoolSize:int=5, encryptionKey:ByteArray=null) 
 		{
-			_connectionPool = new ConnectionPool(databaseFile, maxPoolSize);
+			_connectionPool = new ConnectionPool(databaseFile, maxPoolSize, encryptionKey);
 			// create this cache object ahead of time to avoid the overhead
 			// of checking if it's null each time execute() is called.
 			// Other cache objects won't be needed nearly as much, so 

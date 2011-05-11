@@ -35,6 +35,7 @@ package com.probertson.data.sqlRunnerClasses
 	import flash.events.SQLErrorEvent;
 	import flash.events.SQLEvent;
 	import flash.filesystem.File;
+	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
 	
 	public class ConnectionPool 
@@ -42,10 +43,11 @@ package com.probertson.data.sqlRunnerClasses
 		
 		// ------- Constructor -------
 		
-		public function ConnectionPool(dbFile:File, maxSize:int=5) 
+		public function ConnectionPool(dbFile:File, maxSize:int, encryptionKey:ByteArray) 
 		{
 			_dbFile = dbFile;
 			_maxSize = maxSize;
+			_encryptionKey = encryptionKey;
 			_available = new Vector.<SQLConnection>();
 			_inUse = new Dictionary();
 			_pending = new Vector.<PendingStatement>();
@@ -57,6 +59,7 @@ package com.probertson.data.sqlRunnerClasses
 		private var _dbFile:File;
 		// Standard (pooled) connections
 		private var _maxSize:int = 5;
+		private var _encryptionKey:ByteArray = null;
 		private var _available:Vector.<SQLConnection>;
 		private var _inUse:Dictionary;
 		private var _totalConnections:int = 0;
@@ -141,7 +144,8 @@ package com.probertson.data.sqlRunnerClasses
 				_blockingConnection = new SQLConnection();
 				_blockingConnection.addEventListener(SQLEvent.OPEN, conn_open);
 				_blockingConnection.addEventListener(SQLErrorEvent.ERROR, conn_openError);
-				_blockingConnection.openAsync(_dbFile);
+				
+				_blockingConnection.openAsync(_dbFile, SQLMode.CREATE, null, false, 1024, _encryptionKey);
 			}
 			else
 			{
@@ -236,7 +240,8 @@ package com.probertson.data.sqlRunnerClasses
 					conn = new SQLConnection();
 					conn.addEventListener(SQLEvent.OPEN, conn_open);
 					conn.addEventListener(SQLErrorEvent.ERROR, conn_openError);
-					conn.openAsync(_dbFile, SQLMode.READ);
+					
+					conn.openAsync(_dbFile, SQLMode.READ, null, false, 1024, _encryptionKey);
 					return;
 				}
 				else

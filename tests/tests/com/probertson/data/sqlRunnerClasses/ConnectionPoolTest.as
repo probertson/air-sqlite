@@ -65,7 +65,7 @@ package tests.com.probertson.data.sqlRunnerClasses
 		{
 			addEventListener(Event.COMPLETE, Async.asyncHandler(this, testAddBlockingBatchThenPendingStatement_complete, 3000));
 			
-			_connectionPool = new ConnectionPool(_dbFile);
+			_connectionPool = new ConnectionPool(_dbFile, 5, null);
 			
 			_testCompleteTimer = new Timer(2000);
 			_testCompleteTimer.addEventListener(TimerEvent.TIMER, testAddBlockingBatchThenPendingStatement_timer);
