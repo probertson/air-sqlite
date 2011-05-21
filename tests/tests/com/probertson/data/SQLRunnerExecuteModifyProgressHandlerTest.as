@@ -247,7 +247,7 @@ package tests.com.probertson.data
 		
 		// ------- SQL statements -------
 		
-		[Embed(source="sql/AddRow.sql", mimeType="application/octet-stream")]
+		[Embed(source="/sql/AddRow.sql", mimeType="application/octet-stream")]
 		private static const AddRowStatementText:Class;
 		private static const ADD_ROW_SQL:String = new AddRowStatementText();
 	}

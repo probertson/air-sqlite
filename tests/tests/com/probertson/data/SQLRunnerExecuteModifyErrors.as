@@ -188,11 +188,11 @@ package tests.com.probertson.data
 		
 		// ------- SQL statements -------
 		
-		[Embed(source="sql/InsertError.sql", mimeType="application/octet-stream")]
+		[Embed(source="/sql/InsertError.sql", mimeType="application/octet-stream")]
 		private static const InsertErrorStatementText:Class;
 		private static const INSERT_ERROR_SQL:String = new InsertErrorStatementText();
 		
-		[Embed(source="sql/LoadRowsLimit.sql", mimeType="application/octet-stream")]
+		[Embed(source="/sql/LoadRowsLimit.sql", mimeType="application/octet-stream")]
 		private static const LoadRowsLimitStatementText:Class;
 		private static const LOAD_ROWS_LIMIT_SQL:String = new LoadRowsLimitStatementText();
 		

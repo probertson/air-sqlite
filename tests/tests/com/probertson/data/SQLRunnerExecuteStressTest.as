@@ -215,15 +215,15 @@ package tests.com.probertson.data
 		
 		// ------- SQL statements -------
 		
-		[Embed(source="sql/AddRow.sql", mimeType="application/octet-stream")]
+		[Embed(source="/sql/AddRow.sql", mimeType="application/octet-stream")]
 		private static const AddRowStatementText:Class;
 		private static const ADD_ROW_SQL:String = new AddRowStatementText();
 		
-		[Embed(source="sql/UpdateRow.sql", mimeType="application/octet-stream")]
+		[Embed(source="/sql/UpdateRow.sql", mimeType="application/octet-stream")]
 		private static const UpdateRowStatementText:Class;
 		private static const UPDATE_ROW_SQL:String = new UpdateRowStatementText();
 		
-		[Embed(source="sql/LoadRowsLimit.sql", mimeType="application/octet-stream")]
+		[Embed(source="/sql/LoadRowsLimit.sql", mimeType="application/octet-stream")]
 		private static const LoadRowsLimitStatementText:Class;
 		private static const LOAD_ROWS_LIMIT_SQL:String = new LoadRowsLimitStatementText();
 	}

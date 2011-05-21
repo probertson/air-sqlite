@@ -311,19 +311,19 @@ package tests.com.probertson.data
 		
 		// ------- SQL statements -------
 		
-		[Embed(source="sql/LoadRowsLimit.sql", mimeType="application/octet-stream")]
+		[Embed(source="/sql/LoadRowsLimit.sql", mimeType="application/octet-stream")]
 		private static const LoadRowsLimitStatementText:Class;
 		private static const LOAD_ROWS_LIMIT_SQL:String = new LoadRowsLimitStatementText();
 		
-		[Embed(source="sql/LoadRowsLimitOffset.sql", mimeType="application/octet-stream")]
+		[Embed(source="/sql/LoadRowsLimitOffset.sql", mimeType="application/octet-stream")]
 		private static const LoadRowsLimitOffsetStatementText:Class;
 		private static const LOAD_ROWS_LIMIT_OFFSET_SQL:String = new LoadRowsLimitOffsetStatementText();
 		
-		[Embed(source="sql/LoadRowsParameterizedLimitOffset.sql", mimeType="application/octet-stream")]
+		[Embed(source="/sql/LoadRowsParameterizedLimitOffset.sql", mimeType="application/octet-stream")]
 		private static const LoadRowsParameterizedLimitOffsetStatementText:Class;
 		private static const LOAD_ROWS_PARAMETERIZED_LIMIT_OFFSET_SQL:String = new LoadRowsParameterizedLimitOffsetStatementText();
 		
-		[Embed(source="sql/AddRow.sql", mimeType="application/octet-stream")]
+		[Embed(source="/sql/AddRow.sql", mimeType="application/octet-stream")]
 		private static const AddRowStatementText:Class;
 		private static const ADD_ROW_SQL:String = new AddRowStatementText();
 	}
