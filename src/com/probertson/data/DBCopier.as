@@ -108,7 +108,7 @@ package com.probertson.data
 				throw new ArgumentError("The outputPath parameter can't specify an existing database (or other) file.");
 			}
 			
-			if (destEncryptionKey != null && encryptionKey.length != 16)
+			if (destEncryptionKey != null && destEncryptionKey.length != 16)
 			{
 				throw new ArgumentError("The destEncryptionKey parameter must be null or a ByteArray whose length is exactly 16 bytes.");
 			}
@@ -163,7 +163,7 @@ package com.probertson.data
 		}
 		
 		
-		private var _currentStep:String = EncrypterProgressPhase.PRE_INIT;
+		private var _currentStep:String = CopyProgressPhase.PRE_INIT;
 		
 		/**
 		 * The current step in the database copy process. The possible 
@@ -448,7 +448,7 @@ package com.probertson.data
 		// 5. begin transaction
 		private function beginTransaction():void
 		{
-			setProgress(EncrypterProgressPhase.BEGIN);
+			setProgress(CopyProgressPhase.BEGIN);
 			
 			_conn.addEventListener(SQLEvent.BEGIN, beginHandler);
 			_conn.begin(SQLTransactionLockType.EXCLUSIVE);
@@ -477,7 +477,7 @@ package com.probertson.data
 		
 		private function createNextTable():void
 		{
-			setProgress(EncrypterProgressPhase.CREATE_TABLES);
+			setProgress(CopyProgressPhase.CREATE_TABLES);
 			
 			var createTableStmt:SQLStatement = _createTables.shift();
 			createTableStmt.addEventListener(SQLEvent.RESULT, createTableHandler);
@@ -517,7 +517,7 @@ package com.probertson.data
 		
 		private function createNextIndex():void
 		{
-			setProgress(EncrypterProgressPhase.CREATE_INDICES);
+			setProgress(CopyProgressPhase.CREATE_INDICES);
 			
 			var createIndexStmt:SQLStatement = _createIndices.shift();
 			createIndexStmt.addEventListener(SQLEvent.RESULT, createIndexHandler);
@@ -557,7 +557,7 @@ package com.probertson.data
 		
 		private function createNextView():void
 		{
-			setProgress(EncrypterProgressPhase.CREATE_VIEWS);
+			setProgress(CopyProgressPhase.CREATE_VIEWS);
 			
 			var createViewStmt:SQLStatement = _createViews.shift();
 			createViewStmt.addEventListener(SQLEvent.RESULT, createViewHandler);
@@ -597,7 +597,7 @@ package com.probertson.data
 		
 		private function createNextTrigger():void
 		{
-			setProgress(EncrypterProgressPhase.CREATE_TRIGGERS);
+			setProgress(CopyProgressPhase.CREATE_TRIGGERS);
 			
 			var createTriggerStmt:SQLStatement = _createTriggers.shift();
 			createTriggerStmt.addEventListener(SQLEvent.RESULT, createTriggerHandler);
@@ -637,7 +637,7 @@ package com.probertson.data
 		
 		private function copyNextTable():void
 		{
-			setProgress(EncrypterProgressPhase.COPY_TABLE_DATA);
+			setProgress(CopyProgressPhase.COPY_TABLE_DATA);
 			
 			var copyTableStmt:SQLStatement = _copyTableData.shift();
 			copyTableStmt.addEventListener(SQLEvent.RESULT, copyTableHandler);
@@ -664,7 +664,7 @@ package com.probertson.data
 		// 11. commit transaction
 		private function commitTransaction():void
 		{
-			setProgress(EncrypterProgressPhase.CLOSE);
+			setProgress(CopyProgressPhase.CLOSE);
 			
 			_conn.addEventListener(SQLEvent.COMMIT, commitHandler);
 			_conn.commit();
@@ -707,7 +707,7 @@ package com.probertson.data
 			_conn.removeEventListener(SQLEvent.CLOSE, closeHandler);
 			_conn.removeEventListener(SQLErrorEvent.ERROR, errorHandler);
 			
-			setProgress(EncrypterProgressPhase.COMPLETE);
+			setProgress(CopyProgressPhase.COMPLETE);
 		}
 		
 		
