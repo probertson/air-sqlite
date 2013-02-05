@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Flex Compiler Configuration
+ */
+-->
+<flex-config xmlns="http://www.adobe.com/2006/flex-config">    
+  <target-player>11.4</target-player>
+  <swf-version>17</swf-version>  
+  <compiler>
+    <define append="true"><name>CONFIG::debug</name><value>true</value></define>
+  </compiler>   
+</flex-config>

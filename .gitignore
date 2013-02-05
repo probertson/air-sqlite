@@ -24,3 +24,9 @@
 /.FlexUnitSettings
 */FlexUnitApplication.mxml
 */FlexUnitApplication-app.xml
+
+####
+# Gradle
+####
+.gradle
+*/TestRunner.mxml

@@ -1,0 +1,72 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+    
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'org.gradlefx', name: 'gradlefx', version: '0.6.3'
+    }
+}
+
+apply plugin: 'gradlefx'        
+group = 'com.probertson.data'
+version = '1.0-SNAPSHOT'    
+frameworkLinkage = 'merged'            
+playerVersion = '11.4'
+type = 'swc'
+
+defaultTasks 'clean', 'test', 'compile'
+    
+configurations {
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    mavenRepo name: 'yoolab-releases',      url: "http://projects.yoolab.org/maven/content/repositories/releases"
+    mavenRepo name: 'yoolab-snapshots',     url: "http://projects.yoolab.org/maven/content/repositories/snapshots"
+}
+
+dependencies {
+    test files(project.file('libs/flexUnitTasks-4.1.0-8.jar').absolutePath,
+    project.file('libs/mockolate-0.12.4-flex.swc').absolutePath,
+    project.file('libs/flexunit-4.1.0-8-flex_4.1.0.16076.swc').absolutePath,
+    project.file('libs/flexunit-cilistener-4.1.0-8-4.1.0.16076.swc').absolutePath)
+}
+
+srcDirs = [
+    'src'
+]
+
+testDirs = [
+    'src',
+    'tests'
+]
+
+additionalCompilerOptions = [
+    '-debug=true',
+    '-omit-trace-statements=false',
+    '-verbose-stacktraces=true',
+    '-load-config+='+project.projectDir+'/.flexConfig.xml'
+]
+
+////////////////////
+// FlexUnit
+////////////////////
+
+// http://docs.flexunit.org/index.php?title=Ant_Task
+
+def os = System.getProperty('os.name').toLowerCase()
+if (os.contains('windows') || os.contains('mac os')) {
+    flexUnit.headless = false
+}
+else {
+    flexUnit.headless = true
+} // assume Linux
+
+flexUnit.verbose = false
+flexUnit.player = 'flash'
+flexUnit.command = System.getenv()['FLASH_PLAYER_EXE']
+
+
