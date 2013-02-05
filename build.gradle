@@ -34,9 +34,6 @@ dependencies {
     project.file(flexHome+'/frameworks/libs/air/aircore.swc').absolutePath,
     project.file(flexHome+'/frameworks/libs/air/airframework.swc').absolutePath,
     project.file(flexHome+'/frameworks/libs/air/airglobal.swc').absolutePath)
-    external files(project.file(flexHome+'/frameworks/libs/air/aircore.swc').absolutePath,
-    project.file(flexHome+'/frameworks/libs/air/airframework.swc').absolutePath,
-    project.file(flexHome+'/frameworks/libs/air/airglobal.swc').absolutePath)
 }
 
 srcDirs = [
@@ -51,7 +48,7 @@ additionalCompilerOptions = [
     '-debug=true',
     '-omit-trace-statements=false',
     '-verbose-stacktraces=true',
-    '-load-config+='+project.projectDir+'/.flexConfig.xml'
+    '-load-config+='+project.projectDir+'/.flexConfig.xml'    
 ]
 
 ////////////////////
@@ -60,16 +57,23 @@ additionalCompilerOptions = [
 
 // http://docs.flexunit.org/index.php?title=Ant_Task
 
+flexUnit.verbose = true
+flexUnit.player = 'air'
+
 def os = System.getProperty('os.name').toLowerCase()
-if (os.contains('windows') || os.contains('mac os')) {
+if (os.contains('windows')) {
     flexUnit.headless = false
+    flexUnit.command = flexHome+'/bin/adl.exe'
+}
+else if (os.contains('mac os')) {
+    flexUnit.headless = false
+    flexUnit.command = flexHome+'/bin/adl'
 }
 else {
     flexUnit.headless = true
+    flexUnit.command = flexHome+'/bin/adl'
 } // assume Linux
 
-flexUnit.verbose = false
-flexUnit.player = 'flash'
-flexUnit.command = System.getenv()['FLASH_PLAYER_EXE']
+
 
 
