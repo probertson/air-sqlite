@@ -29,4 +29,5 @@
 # Gradle
 ####
 .gradle
+/build
 */TestRunner.mxml

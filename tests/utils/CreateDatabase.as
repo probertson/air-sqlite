@@ -65,11 +65,11 @@
 		
 		// ------- SQL statements -------
 		
-		[Embed(source="sql/create/CreateTable_testTable.sql", mimeType="application/octet-stream")]
+		[Embed(source="/sql/create/CreateTable_testTable.sql", mimeType="application/octet-stream")]
 		private static const CreateTableStatementText:Class;
 		private static const CREATE_TABLE_SQL:String = new CreateTableStatementText();
 		
-		[Embed(source="sql/create/PopulateTable_testTable.sql", mimeType="application/octet-stream")]
+		[Embed(source="/sql/create/PopulateTable_testTable.sql", mimeType="application/octet-stream")]
 		private static const PopulateTableStatementText:Class;
 		private static const POPULATE_TABLE_SQL:String = new PopulateTableStatementText();
 	}

@@ -11,15 +11,11 @@ buildscript {
 
 apply plugin: 'gradlefx'        
 group = 'com.probertson.data'
-version = '1.0-SNAPSHOT'    
-frameworkLinkage = 'merged'            
+version = '1.0-SNAPSHOT'              
 playerVersion = '11.4'
 type = 'swc'
 
 defaultTasks 'clean', 'test', 'compile'
-    
-configurations {
-}
 
 repositories {
     mavenCentral()
@@ -30,9 +26,17 @@ repositories {
 
 dependencies {
     test files(project.file('libs/flexUnitTasks-4.1.0-8.jar').absolutePath,
+    project.file('libs/hamcrest-as3-flex-1.1.3.swc').absolutePath,
     project.file('libs/mockolate-0.12.4-flex.swc').absolutePath,
     project.file('libs/flexunit-4.1.0-8-flex_4.1.0.16076.swc').absolutePath,
-    project.file('libs/flexunit-cilistener-4.1.0-8-4.1.0.16076.swc').absolutePath)
+    project.file('libs/flexunit-cilistener-4.1.0-8-4.1.0.16076.swc').absolutePath,
+    project.file('libs/flexunit-aircilistener-4.1.0-8-4.1.0.16076.swc').absolutePath,
+    project.file(flexHome+'/frameworks/libs/air/aircore.swc').absolutePath,
+    project.file(flexHome+'/frameworks/libs/air/airframework.swc').absolutePath,
+    project.file(flexHome+'/frameworks/libs/air/airglobal.swc').absolutePath)
+    external files(project.file(flexHome+'/frameworks/libs/air/aircore.swc').absolutePath,
+    project.file(flexHome+'/frameworks/libs/air/airframework.swc').absolutePath,
+    project.file(flexHome+'/frameworks/libs/air/airglobal.swc').absolutePath)
 }
 
 srcDirs = [
@@ -40,7 +44,6 @@ srcDirs = [
 ]
 
 testDirs = [
-    'src',
     'tests'
 ]
 
